@@ -55,7 +55,7 @@ export const products: Product[] = [
     rating: 4.8,
     reviews: 198,
     category: 'إلكترونيات',
-    imageCover: img('1544244015-0df4-4b6b-b6a0-07b3a7dc4f85'),
+    imageCover: img('1544244015-0df4b3ffc6b0'),
     badge: 'جديد',
   },
   {

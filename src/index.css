@@ -12,6 +12,7 @@
 }
 
 body {
+    overflow-x: hidden;
     font-family: var(--font-sans);
     @layer base{
         .bg-main-color{

@@ -7,6 +7,7 @@ import { FiTruck, FiShield, FiHeadphones, FiChevronLeft, FiChevronRight, FiHeart
 import { products } from '../../data/products';
 import type { Product } from '../../data/products';
 import Category from '../Categories/Category';
+import { FaStar } from 'react-icons/fa';
 
 
 export default function Home() {
@@ -14,7 +15,8 @@ export default function Home() {
   const [product, setproduct] = useState<Product[]>(products)
   const [activeTab, setActiveTab] = useState<string>('الكل')
   const [scrollProgress, setScrollProgress] = useState(0)
-  console.log(product);
+  const [prodHigestRated, setprodHigestRated] = useState<Product[]>(products.filter((product) => product.rating >= 4.5))
+  // console.log(product);
 
   const sliderRef = useRef<HTMLDivElement>(null);
 
@@ -47,7 +49,7 @@ export default function Home() {
         const { scrollLeft, scrollWidth, clientWidth } = sliderRef.current;
         const cardStep = 380;
         const isAtEnd = Math.abs(scrollLeft) + clientWidth >= scrollWidth - 50;
-        
+
         if (isAtEnd) {
           sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
@@ -64,7 +66,7 @@ export default function Home() {
         item => item.category === product.category
       )
   );
-  
+
   const filteredProducts = activeTab === 'الكل'
     ? products
     : products.filter(p => p.category === activeTab);
@@ -138,16 +140,16 @@ export default function Home() {
       </div>
       <div className="categories w-[95%] md:w-[90%] lg:w-[80%] mx-auto relative px-4 md:px-12">
         {/* Navigation Buttons (Visible on both mobile & desktop, styled responsively) */}
-        <button 
-          onClick={() => scroll('right')} 
+        <button
+          onClick={() => scroll('right')}
           className="absolute -right-2 md:-right-6 top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-100 hover:bg-[#00342B] text-[#00342B] hover:text-white p-2 md:p-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer flex items-center justify-center hover:scale-110 active:scale-95"
           aria-label="Scroll right"
         >
           <FiChevronRight className="text-lg md:text-xl" />
         </button>
 
-        <button 
-          onClick={() => scroll('left')} 
+        <button
+          onClick={() => scroll('left')}
           className="absolute -left-2 md:-left-6 top-1/2 -translate-y-1/2 z-10 bg-white border border-gray-100 hover:bg-[#00342B] text-[#00342B] hover:text-white p-2 md:p-3 rounded-full shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer flex items-center justify-center hover:scale-110 active:scale-95"
           aria-label="Scroll left"
         >
@@ -155,10 +157,10 @@ export default function Home() {
         </button>
 
         {/* Categories overflow container */}
-        <div 
-          ref={sliderRef} 
+        <div
+          ref={sliderRef}
           onScroll={handleScroll}
-          className="container flex overflow-x-auto no-scrollbar w-full gap-10 my-10 snap-x snap-mandatory scroll-smooth pb-4" 
+          className="container flex overflow-x-auto no-scrollbar w-full gap-10 my-10 snap-x snap-mandatory scroll-smooth pb-4"
           dir="rtl"
         >
           {
@@ -175,15 +177,42 @@ export default function Home() {
 
         {/* Visual Progress Bar (Professional Scroll Indicator) */}
         <div className="w-[100px] h-[3px] bg-gray-200 mx-auto mt-4 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-[#00342B] transition-all duration-300 ease-out" 
-            style={{ width: `${Math.min(100, Math.max(15, scrollProgress))}%` }} 
+          <div
+            className="h-full bg-[#00342B] transition-all duration-300 ease-out"
+            style={{ width: `${Math.min(100, Math.max(15, scrollProgress))}%` }}
           />
         </div>
       </div>
 
     </section>
+    <section className='highest-rated-products w-full lg:w-[90%] mx-auto text-center flex flex-col gap-10 py-16 '>
+      <h3 className='text-3xl font-bold text-[#00342B]'>الاعلي تقييما</h3>
+      <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10'>
+       {
+        prodHigestRated.slice(0,4).map((pro)=>(
+           <div key={pro.id} className="card rounded-2xl shadow-lg overflow-hidden flex flex-col cursor-pointer hover:shadow-2xl transition-all duration-300 ease-in-out hover:-translate-y-2" >
+          <picture className="picMostRated image w-full h-[80%] relative overflow-hidden addToCart">
+            <img src={pro.imageCover} alt={pro.title} className='w-full h-full object-cover' />
+          </picture>
+          <div className="content flex flex-col items-end mx-3 mt-4 p-3">
+            <span className="categoryName text-gray-500">{pro.category}</span>
+            <h5 className="font-semibold text-[#00342B] text-right w-full">{pro.title}</h5>
+            <div className="flex justify-between items-center w-full">
+              <span className='font-semibold text-[#00342B]'>{pro.price} د.ع</span>
+              <div className="flex  items-center gap-1">
+                <span className='text-gray-500'>{pro.rating}</span>
+                <FaStar className="text-yellow-500" />
+              </div>
+            </div>
+          </div>
 
- 
+        </div>
+        ))
+       }
+      </div>
+
+    </section>
+
+
   </>
 }

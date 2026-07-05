@@ -186,7 +186,7 @@ export const products: Product[] = [
     rating: 4.9,
     reviews: 76,
     category: 'أزياء',
-    imageCover: img('1548036161-65f34a75bae9'),
+    imageCover: img('1566150905458-1bf1fc113f0d'),
     isFeatured: true,
   },
   {

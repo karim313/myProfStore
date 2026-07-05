@@ -1,22 +1,11 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Mail,
-  Phone,
-  MapPin,
-  ArrowRight,
-  Truck,
-  ShieldCheck,
-  RotateCcw,
-  Headphones,
-  CheckCircle
+  Mail, Phone, MapPin, ArrowLeft,
+  Truck, ShieldCheck, RotateCcw, Headphones, CheckCircle
 } from 'lucide-react'
 import {
-  FaFacebookF,
-  FaTwitter,
-  FaInstagram,
-  FaYoutube,
-  FaLinkedinIn
+  FaFacebookF, FaTwitter, FaInstagram, FaYoutube, FaLinkedinIn
 } from 'react-icons/fa'
 
 export default function Footer() {
@@ -33,98 +22,94 @@ export default function Footer() {
   }
 
   return (
-    <footer className="w-full bg-slate-900 text-slate-300 pt-16 mt-auto border-t border-slate-800">
-      
-      {/* 1. SHOP TRUST/FEATURES BANNER */}
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 border-b border-slate-800">
+    <footer className="w-full bg-[#00221C] text-gray-300 pt-16 mt-auto border-t border-[#00342B]" dir="rtl">
+
+      {/* 1. TRUST FEATURES BANNER */}
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 border-b border-[#00342B]/60">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          
-          {/* Feature 1 */}
-          <div className="flex items-start space-x-4 group">
-            <div className="p-3 bg-slate-800 text-indigo-400 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+
+          <div className="flex items-start gap-4 group">
+            <div className="p-3 bg-[#00342B] text-emerald-400 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
               <Truck className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-slate-100 uppercase tracking-wide">Free Shipping</h4>
-              <p className="text-xs text-slate-400 mt-1">On all orders over $50.00 worldwide.</p>
+              <h4 className="text-sm font-bold text-gray-100 tracking-wide">شحن سريع</h4>
+              <p className="text-xs text-gray-400 mt-1">توصيل سريع وموثوق لكافة المحافظات.</p>
             </div>
           </div>
 
-          {/* Feature 2 */}
-          <div className="flex items-start space-x-4 group">
-            <div className="p-3 bg-slate-800 text-indigo-400 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+          <div className="flex items-start gap-4 group">
+            <div className="p-3 bg-[#00342B] text-emerald-400 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-slate-100 uppercase tracking-wide">Secure Payment</h4>
-              <p className="text-xs text-slate-400 mt-1">100% protected SSL online checkout.</p>
+              <h4 className="text-sm font-bold text-gray-100 tracking-wide">دفع آمن 100%</h4>
+              <p className="text-xs text-gray-400 mt-1">حماية كاملة لبياناتك ودفع آمن.</p>
             </div>
           </div>
 
-          {/* Feature 3 */}
-          <div className="flex items-start space-x-4 group">
-            <div className="p-3 bg-slate-800 text-indigo-400 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+          <div className="flex items-start gap-4 group">
+            <div className="p-3 bg-[#00342B] text-emerald-400 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
               <RotateCcw className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-slate-100 uppercase tracking-wide">30-Day Returns</h4>
-              <p className="text-xs text-slate-400 mt-1">Hassle-free exchanges & full refunds.</p>
+              <h4 className="text-sm font-bold text-gray-100 tracking-wide">إرجاع خلال 30 يوم</h4>
+              <p className="text-xs text-gray-400 mt-1">سياسة استبدال واسترجاع مرنة وسهلة.</p>
             </div>
           </div>
 
-          {/* Feature 4 */}
-          <div className="flex items-start space-x-4 group">
-            <div className="p-3 bg-slate-800 text-indigo-400 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
+          <div className="flex items-start gap-4 group">
+            <div className="p-3 bg-[#00342B] text-emerald-400 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
               <Headphones className="w-6 h-6" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-slate-100 uppercase tracking-wide">24/7 Support</h4>
-              <p className="text-xs text-slate-400 mt-1">Dedicated customer service helpdesk.</p>
+              <h4 className="text-sm font-bold text-gray-100 tracking-wide">دعم فني 24/7</h4>
+              <p className="text-xs text-gray-400 mt-1">فريق متكامل لمساعدتك على مدار الساعة.</p>
             </div>
           </div>
 
         </div>
       </div>
 
-      {/* 2. NEWSLETTER SUBSCRIPTION BANNER */}
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-b border-slate-800">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-8 bg-gradient-to-r from-slate-900 to-indigo-950/40 p-8 sm:p-10 rounded-2xl border border-slate-800">
-          
-          <div className="max-w-md text-center lg:text-left">
-            <span className="text-[11px] font-bold tracking-wider text-indigo-400 uppercase">Subscribe to our newsletter</span>
-            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-100 mt-1">Get 20% Off Your First Purchase</h3>
-            <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
-              Stay in the loop! Receive updates on new arrivals, weekly sales, coupons, and exclusive member announcements.
+      {/* 2. NEWSLETTER */}
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-12 border-b border-[#00342B]/60">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8 bg-gradient-to-l from-[#00221C] to-[#00342B]/40 p-8 sm:p-10 rounded-2xl border border-[#00342B]/50">
+
+          <div className="max-w-md text-center lg:text-right">
+            <span className="text-[11px] font-bold tracking-wider text-emerald-400 uppercase">اشترك في نشرتنا البريدية</span>
+            <h3 className="text-xl sm:text-2xl font-extrabold text-gray-100 mt-1">احصل على خصم 20% على طلبك الأول</h3>
+            <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">
+              كن أول من يعرف بأحدث المنتجات الحصرية والعروض والخصومات الأسبوعية.
             </p>
           </div>
 
           <div className="w-full max-w-md">
             {subscribed ? (
-              <div className="flex items-center space-x-2.5 bg-indigo-950/30 border border-indigo-500/30 text-indigo-400 p-4 rounded-xl text-xs font-semibold">
+              <div className="flex items-center gap-2.5 bg-emerald-950/30 border border-emerald-500/30 text-emerald-400 p-4 rounded-xl text-xs font-semibold">
                 <CheckCircle className="w-5 h-5 shrink-0" />
-                <span>Thank you! You have successfully subscribed to our newsletter. Check your inbox for your 20% discount code.</span>
+                <span>شكراً! تم اشتراكك بنجاح. تحقق من بريدك للحصول على كود الخصم.</span>
               </div>
             ) : (
               <form onSubmit={handleSubscribe} className="flex gap-2">
                 <div className="relative flex-1">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none text-gray-500">
                     <Mail className="w-4 h-4" />
                   </div>
                   <input
                     type="email"
                     required
-                    placeholder="Enter your email address..."
+                    placeholder="أدخل بريدك الإلكتروني هنا..."
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-950 text-slate-100 text-xs rounded-xl pl-10 pr-4 py-3 focus:outline-none transition-all placeholder-slate-500"
+                    className="w-full bg-[#001713] border border-[#00342B] focus:border-emerald-600 focus:ring-2 focus:ring-emerald-950/50 text-gray-100 text-xs rounded-xl pr-10 pl-4 py-3 focus:outline-none transition-all placeholder-gray-500 text-right"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all shadow-md cursor-pointer flex items-center space-x-1 shrink-0"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all shadow-md cursor-pointer flex items-center gap-1 shrink-0"
                 >
-                  <span>Subscribe</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <span>اشترك الآن</span>
+                  <ArrowLeft className="w-3.5 h-3.5" />
                 </button>
               </form>
             )}
@@ -133,94 +118,91 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* 3. MAIN FOOTER NAVIGATION LINKS */}
+      {/* 3. MAIN NAV LINKS */}
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-6 gap-8 sm:gap-10">
-          
-          {/* Brand Col (Spans 2 columns) */}
+
+          {/* Brand */}
           <div className="md:col-span-2 space-y-4">
-            <Link to="/" className="flex items-center space-x-2.5 group">
-              <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md">
-                <span className="font-black text-white text-base">S</span>
+            <Link to="/" className="flex items-center gap-2.5 group">
+              <div className="w-9 h-9 bg-emerald-600 rounded-xl flex items-center justify-center shadow-md">
+                <span className="font-black text-white text-base">M</span>
               </div>
               <span className="text-xl font-extrabold tracking-tight text-white">
-                MyStore<span className="text-indigo-500">.</span>
+                متجرنا<span className="text-emerald-500">.</span>
               </span>
             </Link>
-            <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-              Your premium destination for high-quality electronics, modern apparel, activewear, and stylish home essentials. We deliver curated convenience and reliable quality direct to your doorstep.
+            <p className="text-xs text-gray-400 leading-relaxed max-w-sm">
+              وجهتك الأولى للتسوق الإلكتروني. تشكيلة مختارة بعناية من الإلكترونيات، الأزياء، مستلزمات المنزل وأكثر بجودة ممتازة.
             </p>
-            <div className="flex items-center space-x-3 pt-2">
+            <div className="flex items-center gap-3 pt-2">
               {[
-                { icon: <FaFacebookF className="w-4 h-4" />, url: '#facebook' },
-                { icon: <FaTwitter className="w-4 h-4" />, url: '#twitter' },
-                { icon: <FaInstagram className="w-4 h-4" />, url: '#instagram' },
-                { icon: <FaYoutube className="w-4 h-4" />, url: '#youtube' },
-                { icon: <FaLinkedinIn className="w-4 h-4" />, url: '#linkedin' },
-              ].map((social, index) => (
-                <a
-                  key={index}
-                  href={social.url}
-                  className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-400 flex items-center justify-center transition-all duration-200"
-                  aria-label="Social Link"
-                >
-                  {social.icon}
+                { icon: <FaFacebookF />, url: '#' },
+                { icon: <FaTwitter />, url: '#' },
+                { icon: <FaInstagram />, url: '#' },
+                { icon: <FaYoutube />, url: '#' },
+                { icon: <FaLinkedinIn />, url: '#' },
+              ].map((s, i) => (
+                <a key={i} href={s.url}
+                  className="w-8 h-8 rounded-lg bg-[#00342B] hover:bg-emerald-600 hover:text-white text-gray-400 flex items-center justify-center transition-all duration-200"
+                  aria-label="social">
+                  {s.icon}
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Quick Links / Shop Category */}
+          {/* Shop */}
           <div className="space-y-4">
-            <h4 className="text-xs font-bold text-slate-100 uppercase tracking-widest">Shop & Categories</h4>
+            <h4 className="text-xs font-bold text-gray-100 uppercase tracking-widest border-b border-[#00342B] pb-2">فئات التسوق</h4>
             <ul className="space-y-2 text-xs font-medium">
-              <li><Link to="/category" className="hover:text-indigo-400 transition-colors">Electronics & Gadgets</Link></li>
-              <li><Link to="/category" className="hover:text-indigo-400 transition-colors">Fashion & Clothing</Link></li>
-              <li><Link to="/category" className="hover:text-indigo-400 transition-colors">Home Decor & Living</Link></li>
-              <li><Link to="/category" className="hover:text-indigo-400 transition-colors">Beauty & Personal Care</Link></li>
-              <li><Link to="/category" className="hover:text-indigo-400 transition-colors">Sports & Outdoors</Link></li>
+              <li><Link to="/category" className="hover:text-emerald-400 transition-colors">إلكترونيات وأجهزة ذكية</Link></li>
+              <li><Link to="/category" className="hover:text-emerald-400 transition-colors">أزياء وملابس راقية</Link></li>
+              <li><Link to="/category" className="hover:text-emerald-400 transition-colors">مستلزمات المنزل</Link></li>
+              <li><Link to="/category" className="hover:text-emerald-400 transition-colors">جمال وعناية شخصية</Link></li>
+              <li><Link to="/category" className="hover:text-emerald-400 transition-colors">ملابس وأدوات رياضية</Link></li>
             </ul>
           </div>
 
-          {/* Customer Service */}
+          {/* Support */}
           <div className="space-y-4">
-            <h4 className="text-xs font-bold text-slate-100 uppercase tracking-widest">Customer Care</h4>
+            <h4 className="text-xs font-bold text-gray-100 uppercase tracking-widest border-b border-[#00342B] pb-2">خدمة العملاء</h4>
             <ul className="space-y-2 text-xs font-medium">
-              <li><a href="#help" className="hover:text-indigo-400 transition-colors">Help Center / FAQs</a></li>
-              <li><a href="#track" className="hover:text-indigo-400 transition-colors">Track Your Order</a></li>
-              <li><a href="#returns" className="hover:text-indigo-400 transition-colors">Returns & Refunds</a></li>
-              <li><a href="#shipping" className="hover:text-indigo-400 transition-colors">Shipping Policy</a></li>
-              <li><a href="#support" className="hover:text-indigo-400 transition-colors">Customer Support</a></li>
+              <li><a href="#" className="hover:text-emerald-400 transition-colors">مركز المساعدة</a></li>
+              <li><a href="#" className="hover:text-emerald-400 transition-colors">تتبع طلبك</a></li>
+              <li><a href="#" className="hover:text-emerald-400 transition-colors">سياسة الإرجاع</a></li>
+              <li><a href="#" className="hover:text-emerald-400 transition-colors">تفاصيل الشحن</a></li>
+              <li><a href="#" className="hover:text-emerald-400 transition-colors">تواصل مع الدعم</a></li>
             </ul>
           </div>
 
-          {/* About Company */}
+          {/* Company */}
           <div className="space-y-4">
-            <h4 className="text-xs font-bold text-slate-100 uppercase tracking-widest">Our Company</h4>
+            <h4 className="text-xs font-bold text-gray-100 uppercase tracking-widest border-b border-[#00342B] pb-2">شركتنا</h4>
             <ul className="space-y-2 text-xs font-medium">
-              <li><a href="#about" className="hover:text-indigo-400 transition-colors">About MyStore</a></li>
-              <li><a href="#careers" className="hover:text-indigo-400 transition-colors">Careers / Hiring</a></li>
-              <li><a href="#stores" className="hover:text-indigo-400 transition-colors">Store Locations</a></li>
-              <li><a href="#blog" className="hover:text-indigo-400 transition-colors">Latest News & Blog</a></li>
-              <li><a href="#affiliate" className="hover:text-indigo-400 transition-colors">Affiliate Program</a></li>
+              <li><a href="#" className="hover:text-emerald-400 transition-colors">عن متجرنا</a></li>
+              <li><a href="#" className="hover:text-emerald-400 transition-colors">الفرص الوظيفية</a></li>
+              <li><a href="#" className="hover:text-emerald-400 transition-colors">مواقع الفروع</a></li>
+              <li><a href="#" className="hover:text-emerald-400 transition-colors">المدونة والأخبار</a></li>
+              <li><a href="#" className="hover:text-emerald-400 transition-colors">برنامج العمولة</a></li>
             </ul>
           </div>
 
-          {/* Contact Details */}
+          {/* Contact */}
           <div className="space-y-4">
-            <h4 className="text-xs font-bold text-slate-100 uppercase tracking-widest">Get In Touch</h4>
+            <h4 className="text-xs font-bold text-gray-100 uppercase tracking-widest border-b border-[#00342B] pb-2">اتصل بنا</h4>
             <ul className="space-y-3.5 text-xs font-medium">
-              <li className="flex items-start space-x-2.5">
-                <MapPin className="w-4.5 h-4.5 text-indigo-500 shrink-0 mt-0.5" />
-                <span className="text-slate-400 leading-tight">123 E-Commerce St, Suite 500, New York, NY 10001</span>
+              <li className="flex items-start gap-2.5">
+                <MapPin className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                <span className="text-gray-400 leading-tight">شارع الرشيد، الكرادة، بغداد</span>
               </li>
-              <li className="flex items-center space-x-2.5">
-                <Phone className="w-4.5 h-4.5 text-indigo-500 shrink-0" />
-                <span className="text-slate-400 font-bold">+1 (800) 123-4567</span>
+              <li className="flex items-center gap-2.5">
+                <Phone className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span className="text-gray-400 font-bold" dir="ltr">+964 770 123 4567</span>
               </li>
-              <li className="flex items-center space-x-2.5">
-                <Mail className="w-4.5 h-4.5 text-indigo-500 shrink-0" />
-                <span className="text-slate-400">support@mystore.com</span>
+              <li className="flex items-center gap-2.5">
+                <Mail className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span className="text-gray-400">support@mystore.com</span>
               </li>
             </ul>
           </div>
@@ -228,29 +210,26 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* 4. COPYRIGHT & PAYMENT METRICS (Bottom Bar) */}
-      <div className="w-full bg-slate-950 py-6 px-4 sm:px-6 lg:px-8 border-t border-slate-900">
+      {/* 4. BOTTOM BAR */}
+      <div className="w-full bg-[#001713] py-6 px-4 sm:px-6 lg:px-8 border-t border-[#00221C]">
         <div className="max-w-screen-xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          
-          <div className="text-center md:text-left text-xs text-slate-500 font-medium">
-            <span>&copy; {new Date().getFullYear()} MyStore Inc. All Rights Reserved.</span>
-            <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-1 text-[11px] text-slate-600">
-              <a href="#privacy" className="hover:text-slate-400 transition-colors">Privacy Policy</a>
+
+          <div className="text-center md:text-right text-xs text-gray-500">
+            <span>&copy; {new Date().getFullYear()} متجرنا. جميع الحقوق محفوظة.</span>
+            <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-1 text-[11px] text-gray-600">
+              <a href="#" className="hover:text-gray-400 transition-colors">سياسة الخصوصية</a>
               <span>&bull;</span>
-              <a href="#terms" className="hover:text-slate-400 transition-colors">Terms of Service</a>
+              <a href="#" className="hover:text-gray-400 transition-colors">شروط الاستخدام</a>
               <span>&bull;</span>
-              <a href="#sitemap" className="hover:text-slate-400 transition-colors">Sitemap</a>
+              <a href="#" className="hover:text-gray-400 transition-colors">خريطة الموقع</a>
             </div>
           </div>
 
-          {/* Payment Badges */}
-          <div className="flex items-center space-x-2.5">
-            {['Visa', 'Mastercard', 'PayPal', 'ApplePay', 'GooglePay', 'Amex'].map((pmt) => (
-              <span
-                key={pmt}
-                className="px-2.5 py-1 text-[10px] font-extrabold tracking-wider bg-slate-900 border border-slate-800 text-slate-400 rounded-md select-none uppercase hover:border-slate-700 hover:text-slate-300 transition-colors cursor-default"
-              >
-                {pmt}
+          <div className="flex items-center gap-2">
+            {['فيزا', 'ماستركارد', 'زين كاش', 'آبل باي', 'جوجل باي'].map((p) => (
+              <span key={p}
+                className="px-2.5 py-1 text-[10px] font-extrabold bg-[#00221C] border border-[#00342B] text-gray-400 rounded-md select-none hover:border-emerald-800 hover:text-gray-300 transition-colors cursor-default">
+                {p}
               </span>
             ))}
           </div>

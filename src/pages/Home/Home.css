@@ -1,3 +1,18 @@
+/* ==========================================
+   HeroSlider — Floating image animation
+   بيدي إحساس إن الصورة بتطفو / تعوم
+   ========================================== */
+@keyframes heroFloat {
+    0%   { transform: translateY(0px); }
+    50%  { transform: translateY(-14px); }
+    100% { transform: translateY(0px); }
+}
+
+.hero-float-img {
+    animation: heroFloat 5s ease-in-out infinite;
+    will-change: transform;
+}
+
 /* Parent container sizing and positioning */
 .hero-gallery-container {
     display: block;
@@ -102,9 +117,12 @@
 .no-scrollbar::-webkit-scrollbar {
     display: none !important;
 }
+
 .no-scrollbar {
-    -ms-overflow-style: none !important;  /* IE and Edge */
-    scrollbar-width: none !important;  /* Firefox */
+    -ms-overflow-style: none !important;
+    /* IE and Edge */
+    scrollbar-width: none !important;
+    /* Firefox */
 }
 
 /* ************ */
@@ -127,7 +145,8 @@
     content: 'إضافة إلى العربة';
     position: absolute;
     inset: 0;
-    background: rgba(0, 52, 43, 0.75); /* Theme color #00342B with transparency */
+    background: rgba(0, 52, 43, 0.75);
+    /* Theme color #00342B with transparency */
     display: flex;
     justify-content: center;
     align-items: center;

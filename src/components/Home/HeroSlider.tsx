@@ -19,7 +19,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowRight, ArrowLeft, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
+import SmartMatchDrawer from '../../features/smart-match/components/SmartMatchDrawer'
+import SmartMatchButton from '../../features/smart-match/components/SmartMatchButton'
 
 // ─── Slide Data ───────────────────────────────────────────────────────────────
 // غيّر الصور هنا لو حبيت تضيف صور تانية
@@ -93,6 +95,7 @@ export default function HeroSlider() {
   const [current, setCurrent] = useState(0)
   const [direction, setDirection] = useState(1) // 1 = forward, -1 = backward
   const [isPaused, setIsPaused] = useState(false)
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
@@ -297,6 +300,13 @@ export default function HeroSlider() {
                     {slide.secondaryCta.label}
                   </button>
                 </motion.div>
+
+                {/* 5. Smart Match Button (Always visible in Hero) */}
+                <SmartMatchButton 
+                  onClick={() => setIsDrawerOpen(true)}
+                  accentColor={slide.accentColor}
+                  variants={textItemVariants}
+                />
               </motion.div>
             </AnimatePresence>
           </div>
@@ -350,6 +360,8 @@ export default function HeroSlider() {
         />
       </div>
 
+      {/* ── AI Assistant Drawer ── */}
+      <SmartMatchDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
     </section>
   )
 }

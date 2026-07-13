@@ -17,7 +17,7 @@
  * └── FeaturedProducts.tsx  — المنتجات المميزة (bento grid)
  */
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import './Home.css'
 
 import HeroSlider        from '../../components/Home/HeroSlider'
@@ -30,10 +30,23 @@ import FlashSale         from '../../components/Home/FlashSale'
 import NewsletterSection from '../../components/Home/NewsletterSection'
 import { getFeatured }   from '../../data/products'
 import { useNavigate }   from 'react-router-dom'
+import { getProducts } from '../../api/axios'
 
 export default function Home() {
   const navigate       = useNavigate()
   const featuredProducts = getFeatured()
+  const [allProducts, setAllProducts] = useState([])
+const getProductsApi = async () => {
+  const res = await getProducts();
+  setAllProducts(res.data.products);
+  console.log(allProducts);
+  
+};
+
+useEffect(() => {
+  getProductsApi();
+}, []);
+  
 
   return (
     <>
@@ -44,10 +57,10 @@ export default function Home() {
       <WhyUs />
 
       {/* 3. Category Slider — browse by category */}
-      <CategorySlider />
+      <CategorySlider allProducts={allProducts} />
 
       {/* 4. Top Rated — highest-rated products grid */}
-      <TopRated />
+      <TopRated  />
 
       {/* 5. Featured Products — bento grid */}
       <FeaturedProducts

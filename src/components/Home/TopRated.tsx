@@ -1,14 +1,44 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaStar } from 'react-icons/fa'
 import { ArrowRight } from 'lucide-react'
-import { products } from '../../data/products'
+import { getProductReview, getProducts } from '../../api/axios'
 
-// ─── Derived Data ─────────────────────────────────────────────────────────────
-const topRated = products.filter(p => p.rating >= 4.5).slice(0, 4)
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function TopRated() {
+const [reviewedProducts, setReviewedProducts] = useState<any[]>([]);
+
+const getAllReviewed = async () => {
+  const res = await getProducts();
+  const products = res.data.products;
+
+  const result = [];
+
+  for (const product of products) {
+    const review = await getProductReview(product.id);
+
+    if (review.reviewsCount > 0) {
+      result.push({
+        ...product,
+        averageRating: review.averageRating,
+        reviewsCount: review.reviewsCount,
+        comments: review.reviews,
+      });
+    }
+  }
+
+  setReviewedProducts(result);
+  console.log(result);
+  
+};
+
+useEffect(() => {
+  getAllReviewed();
+}, []);
+
+  // const topRated = reviewedProducts.filter(p => p.averageRating >= 4.5).slice(0, 4)
+
   const navigate = useNavigate()
 
   return (
@@ -25,7 +55,7 @@ export default function TopRated() {
 
       {/* Products Grid */}
       <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5'>
-        {topRated.map(pro => (
+        {reviewedProducts.map(pro => (
           <div
             key={pro.id}
             onClick={() => navigate('/products')}
@@ -34,8 +64,8 @@ export default function TopRated() {
             {/* Image */}
             <picture className='picMostRated image w-full h-[220px] relative overflow-hidden addToCart'>
               <img
-                src={pro.imageCover}
-                alt={pro.title}
+                src={pro.imageUrl}
+                alt={pro.name}
                 className='w-full h-full object-cover'
               />
             </picture>
@@ -44,14 +74,14 @@ export default function TopRated() {
             <div className='content flex flex-col items-end p-4 gap-1'>
               <span className='categoryName text-gray-400 text-xs'>{pro.category}</span>
               <h5 className='font-semibold text-[#00342B] text-right w-full text-sm leading-snug'>
-                {pro.title}
+                {pro.name}
               </h5>
               <div className='flex justify-between items-center w-full mt-1'>
                 <span className='font-bold text-[#00342B] text-sm'>
-                  {pro.price.toLocaleString()} د.ع
+                  {pro.finalPrice.toLocaleString()} د.ع
                 </span>
                 <div className='flex items-center gap-1'>
-                  <span className='text-gray-500 text-xs'>{pro.rating}</span>
+                  <span className='text-gray-500 text-xs'>{pro.averageRating.toFixed(2)}</span>
                   <FaStar className='text-yellow-400 text-xs' />
                 </div>
               </div>

@@ -1,0 +1,802 @@
+[
+  {
+    "name": "iPhone 16 Pro Max",
+    "description": "هاتف آبل الرائد الأحدث شاشة 6.9 بوصة ومعالج A18 Pro كاميرا تيتانيوم احترافية.",
+    "price": 72000,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=11",
+    "categoryId": 2
+  },
+  {
+    "name": "Samsung Galaxy S24 Ultra",
+    "description": "عملاق سامسونج مع قلم S-Pen وشاشة Dynamic AMOLED وكاميرا بدقة 200 ميجابكسل وميزات الذكاء الاصطناعي.",
+    "price": 54000,
+    "stockQuantity": 20,
+    "imageUrl": "https://picsum.photos/600/600?random=12",
+    "categoryId": 2
+  },
+  {
+    "name": "MacBook Pro 14 M3",
+    "description": "لابتوب آبل للمحترفين مع معالج M3 الخارق، شاشة Liquid Retina XDR، وعمر بطارية يصل إلى 22 ساعة.",
+    "price": 85000,
+    "stockQuantity": 8,
+    "imageUrl": "https://picsum.photos/600/600?random=13",
+    "categoryId": 2
+  },
+  {
+    "name": "Sony WH-1000XM5",
+    "description": "سماعات رأس لاسلكية مانعة للضوضاء الرائدة في العالم مع جودة صوت استثنائية.",
+    "price": 15500,
+    "stockQuantity": 25,
+    "imageUrl": "https://picsum.photos/600/600?random=14",
+    "categoryId": 2
+  },
+  {
+    "name": "Apple Watch Ultra 2",
+    "description": "ساعة آبل الرياضية الأكثر قوة ومقاومة للماء، مع نظام تحديد مواقع GPS دقيق للغاية وهيكل تيتانيوم.",
+    "price": 38000,
+    "stockQuantity": 12,
+    "imageUrl": "https://picsum.photos/600/600?random=15",
+    "categoryId": 2
+  },
+  {
+    "name": "iPad Pro 11 M4",
+    "description": "تابلت آبل الخارق بشاشة OLED فائقة الوضوح ومعالج M4 القوي وتصميم نحيف جداً.",
+    "price": 49000,
+    "stockQuantity": 10,
+    "imageUrl": "https://picsum.photos/600/600?random=16",
+    "categoryId": 2
+  },
+  {
+    "name": "Sony Alpha 7 IV",
+    "description": "كاميرا احترافية بدون مرآة بدقة 33 ميجابكسل وتصوير فيديو 4K مثالية للمصورين وصناع المحتوى.",
+    "price": 95000,
+    "stockQuantity": 5,
+    "imageUrl": "https://picsum.photos/600/600?random=27",
+    "categoryId": 2
+  },
+  {
+    "name": "Bose QuietComfort Ultra",
+    "description": "سماعات أذن لاسلكية داخل الأذن مريحة للغاية ومقاومة للتعرق مع إلغاء ضوضاء ذكي.",
+    "price": 12800,
+    "stockQuantity": 22,
+    "imageUrl": "https://picsum.photos/600/600?random=19",
+    "categoryId": 2
+  },
+  {
+    "name": "GoPro Hero 12 Black",
+    "description": "كاميرا أكشن لمغامراتك بدقة تصوير 5.3K وثبات فيديو خيالي HyperSmooth 6.0.",
+    "price": 19500,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=20",
+    "categoryId": 2
+  },
+  {
+    "name": "Dell XPS 13 Plus",
+    "description": "لابتوب ويندوز راقي بتصميم مستقبلي، شاشة OLED بدون حواف ومعالج Intel Core i7.",
+    "price": 68000,
+    "stockQuantity": 7,
+    "imageUrl": "https://picsum.photos/600/600?random=21",
+    "categoryId": 2
+  },
+  {
+    "name": "Anker 737 Power Bank",
+    "description": "باوربانك أنكر سريع بقوة 140 واط وسعة 24,000 مللي أمبير مع شاشة ذكية لعرض البيانات.",
+    "price": 5500,
+    "stockQuantity": 40,
+    "imageUrl": "https://picsum.photos/600/600?random=22",
+    "categoryId": 2
+  },
+  {
+    "name": "Keychron K2 V2 Keyboard",
+    "description": "كيبورد ميكانيكي لاسلكي لعشاق الكتابة والبرمجة بنظام ماك وويندوز مع إضاءة RGB خلفية.",
+    "price": 4800,
+    "stockQuantity": 30,
+    "imageUrl": "https://picsum.photos/600/600?random=23",
+    "categoryId": 2
+  },
+  {
+    "name": "Logitech MX Master 3S",
+    "description": "الماوس الاحترافي الأفضل للمصممين والمبرمجين مع عجلة التمرير MagSpeed السريعة الصامتة.",
+    "price": 4200,
+    "stockQuantity": 35,
+    "imageUrl": "https://picsum.photos/600/600?random=24",
+    "categoryId": 2
+  },
+  {
+    "name": "DJI Mini 4 Pro Drone",
+    "description": "طائرة درون تصوير احترافية خفيفة الوزن بأقل من 249 جرام بدقة 4K ومستشعرات تجنب العوائق.",
+    "price": 44000,
+    "stockQuantity": 6,
+    "imageUrl": "https://picsum.photos/600/600?random=25",
+    "categoryId": 2
+  },
+  {
+    "name": "LG C3 OLED 55 Inch TV",
+    "description": "تلفزيون ذكي شاشة أوليد ألوان خيالية ومعدل تحديث 120 هرتز مثالي للألعاب والأفلام السينمائية.",
+    "price": 55000,
+    "stockQuantity": 5,
+    "imageUrl": "https://picsum.photos/600/600?random=26",
+    "categoryId": 2
+  },
+  {
+    "name": "Sennheiser HD 600",
+    "description": "سماعات ستوديو مفتوحة الظهر لعشاق الصوت النقي والتفاصيل الموسيقية الدقيقة.",
+    "price": 14000,
+    "stockQuantity": 12,
+    "imageUrl": "https://picsum.photos/600/600?random=17",
+    "categoryId": 2
+  },
+  {
+    "name": "Seagate FireCuda 2TB SSD",
+    "description": "هارد ديسك داخلي M.2 NVMe سريع جداً متوافق تماماً مع جهاز بلايستيشن 5 لزيادة التخزين.",
+    "price": 6200,
+    "stockQuantity": 25,
+    "imageUrl": "https://picsum.photos/600/600?random=29",
+    "categoryId": 2
+  },
+  {
+    "name": "Kindle Paperwhite 16GB",
+    "description": "قارئ الكتب الإلكترونية الشهير من أمازون شاشة مريحة للعين مقاومة للماء مع إضاءة دافئة.",
+    "price": 8900,
+    "stockQuantity": 20,
+    "imageUrl": "https://picsum.photos/600/600?random=98",
+    "categoryId": 2
+  },
+  {
+    "name": "Belkin 3-in-1 Wireless Charger",
+    "description": "شاحن لاسلكي سريع يعتمد تقنية MagSafe لشحن الآيفون وساعة آبل وسماعات الآيربودز معاً.",
+    "price": 7500,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=79",
+    "categoryId": 2
+  },
+  {
+    "name": "Blue Yeti USB Microphone",
+    "description": "ميكروفون يو إس بي الأفضل للبث المباشر والبودكاست واليوتيوب مع أنماط التقاط متعددة.",
+    "price": 6500,
+    "stockQuantity": 18,
+    "imageUrl": "https://picsum.photos/600/600?random=90",
+    "categoryId": 2
+  },
+  {
+    "name": "Nike Air Max 90",
+    "description": "حذاء رياضي كلاسيكي من نايكي يوفر راحة فائقة وتصميماً جذاباً للاستخدام اليومي.",
+    "price": 5600,
+    "stockQuantity": 30,
+    "imageUrl": "https://picsum.photos/600/600?random=31",
+    "categoryId": 3
+  },
+  {
+    "name": "Adidas Ultraboost Light",
+    "description": "حذاء الجري الأكثر راحة في العالم بتقنية Boost الخفيفة لامتصاص الصدمات واسترجاع الطاقة.",
+    "price": 6800,
+    "stockQuantity": 25,
+    "imageUrl": "https://picsum.photos/600/600?random=32",
+    "categoryId": 3
+  },
+  {
+    "name": "Zara Overcoat Wool Blend",
+    "description": "معطف رجالي كلاسيكي طويل من صوف مخلوط دافئ وأنيق للمناسبات الشتوية الرسمية.",
+    "price": 4900,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=33",
+    "categoryId": 3
+  },
+  {
+    "name": "Tommy Hilfiger Polo Shirt",
+    "description": "قميص بولو قطني كلاسيكي من تومي بقصة مريحة وتطريز الشعار على الصدر.",
+    "price": 2800,
+    "stockQuantity": 50,
+    "imageUrl": "https://picsum.photos/600/600?random=34",
+    "categoryId": 3
+  },
+  {
+    "name": "Levi's 511 Slim Fit Jeans",
+    "description": "بنطلون جينز كلاسيكي ليفايس بقصة ضيقة ومريحة مصنوع من قطن مطاطي متين.",
+    "price": 3200,
+    "stockQuantity": 45,
+    "imageUrl": "https://picsum.photos/600/600?random=35",
+    "categoryId": 3
+  },
+  {
+    "name": "Ray-Ban Classic Wayfarer",
+    "description": "نظارات شمسية ريبان كلاسيكية أصلية توفر حماية 100% من الأشعة فوق البنفسجية.",
+    "price": 5400,
+    "stockQuantity": 20,
+    "imageUrl": "https://picsum.photos/600/600?random=36",
+    "categoryId": 3
+  },
+  {
+    "name": "Lacoste Croc T-Shirt",
+    "description": "تي شيرت لاكوست قطني ناعم بألوان مميزة وتصميم رياضي بسيط مريح للارتداء اليومي.",
+    "price": 1900,
+    "stockQuantity": 60,
+    "imageUrl": "https://picsum.photos/600/600?random=37",
+    "categoryId": 3
+  },
+  {
+    "name": "Puma Carina Women Sneakers",
+    "description": "حذاء بوما كارينا كاجوال نسائي أبيض أنيق مستوحى من موضة الثمانينات ومريح جداً.",
+    "price": 2700,
+    "stockQuantity": 35,
+    "imageUrl": "https://picsum.photos/600/600?random=38",
+    "categoryId": 3
+  },
+  {
+    "name": "Calvin Klein Bomber Jacket",
+    "description": "جاكيت بومبر خفيف الوزن بتصميم عصري من كالفن كلاين مثالي لفصلي الخريف والربيع.",
+    "price": 4500,
+    "stockQuantity": 18,
+    "imageUrl": "https://picsum.photos/600/600?random=39",
+    "categoryId": 3
+  },
+  {
+    "name": "North Face Nuptse Down Jacket",
+    "description": "سترة منفوخة بحشوة ريش أوز دافئة للغاية توفر عزلاً حرارياً فائقاً في الطقس البارد.",
+    "price": 11500,
+    "stockQuantity": 10,
+    "imageUrl": "https://picsum.photos/600/600?random=40",
+    "categoryId": 3
+  },
+  {
+    "name": "Daniel Wellington Classic Watch",
+    "description": "ساعة يد كلاسيكية بتصميم رقيق وحزام جلدي طبيعي بني تناسب الرجال والنساء.",
+    "price": 4800,
+    "stockQuantity": 20,
+    "imageUrl": "https://picsum.photos/600/600?random=41",
+    "categoryId": 3
+  },
+  {
+    "name": "Adidas Originals Superstar",
+    "description": "حذاء سوبر ستار الشهير من أديداس بمقدمة صدفية مطاطية وتصميم أبيض مع خطوط سوداء.",
+    "price": 3900,
+    "stockQuantity": 30,
+    "imageUrl": "https://picsum.photos/600/600?random=42",
+    "categoryId": 3
+  },
+  {
+    "name": "Champion Reverse Weave Hoodie",
+    "description": "هودي ثقيل الوزن من تشامبيون ببطانة ناعمة توفر راحة تامة طوال اليوم.",
+    "price": 2500,
+    "stockQuantity": 40,
+    "imageUrl": "https://picsum.photos/600/600?random=43",
+    "categoryId": 3
+  },
+  {
+    "name": "Michael Kors Leather Tote Bag",
+    "description": "حقيبة يد نسائية جلدية واسعة بتصميم فخم من مايكل كورس لحمل جميع مستلزماتك اليومية.",
+    "price": 8500,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=44",
+    "categoryId": 3
+  },
+  {
+    "name": "Nike Club Fleece Joggers",
+    "description": "بنطلون رياضي مريح من الصوف الناعم من نايكي مناسب للجيم والاسترخاء بالمنزل.",
+    "price": 2200,
+    "stockQuantity": 55,
+    "imageUrl": "https://picsum.photos/600/600?random=46",
+    "categoryId": 3
+  },
+  {
+    "name": "Ralph Lauren Cotton Cable Knit",
+    "description": "بلوفر كلاسيكي محبوك من قطن ناعم عالي الجودة من رالف لورين مظهر شتوي راقٍ.",
+    "price": 4200,
+    "stockQuantity": 20,
+    "imageUrl": "https://picsum.photos/600/600?random=47",
+    "categoryId": 3
+  },
+  {
+    "name": "Dr. Martens 1460 Leather Boots",
+    "description": "حذاء بوت جلدي كلاسيكي متين ومقاوم للماء بتصميم مميز يمنحك مظهراً جذاباً وقوياً.",
+    "price": 7500,
+    "stockQuantity": 12,
+    "imageUrl": "https://picsum.photos/600/600?random=48",
+    "categoryId": 3
+  },
+  {
+    "name": "Fjallraven Kanken Backpack",
+    "description": "حقيبة ظهر سويدية كلاسيكية خفيفة ومقاومة للمياه والاتساخ تناسب المدرسة والسفر اليومي.",
+    "price": 3400,
+    "stockQuantity": 25,
+    "imageUrl": "https://picsum.photos/600/600?random=49",
+    "categoryId": 3
+  },
+  {
+    "name": "Ray-Ban Clubmaster Sunglasses",
+    "description": "نظارة ريبان الشمسية الشهيرة بتصميم ريترو ونصف إطار يجمع بين الأناقة والعصرية.",
+    "price": 5700,
+    "stockQuantity": 18,
+    "imageUrl": "https://picsum.photos/600/600?random=50",
+    "categoryId": 3
+  },
+  {
+    "name": "Hugo Boss Men's Leather Belt",
+    "description": "حزام جلد طبيعي فاخر للرجال بلون أسود كلاسيكي مشبك معدني مصقول.",
+    "price": 3500,
+    "stockQuantity": 30,
+    "imageUrl": "https://picsum.photos/600/600?random=101",
+    "categoryId": 3
+  },
+  {
+    "name": "Nespresso Vertuo Pop Coffee Maker",
+    "description": "ماكينة قهوة كبسولات لتحضير الإسبريسو والقهوة اللذيذة برغوة كثيفة بلمسة زر واحدة.",
+    "price": 7500,
+    "stockQuantity": 20,
+    "imageUrl": "https://picsum.photos/600/600?random=71",
+    "categoryId": 4
+  },
+  {
+    "name": "Philips Airfryer XL",
+    "description": "قلاية هوائية فيليبس بحجم كبير لتحضير طعام صحي ومقرمش بدون زيت بنسبة 90% دهون أقل.",
+    "price": 8900,
+    "stockQuantity": 18,
+    "imageUrl": "https://picsum.photos/600/600?random=72",
+    "categoryId": 4
+  },
+  {
+    "name": "Dyson V8 Cordless Vacuum",
+    "description": "مكنسة دايسون اللاسلكية ذات القوة العالية لتنظيف السجاد والأرضيات الصعبة والزوايا الضيقة.",
+    "price": 22000,
+    "stockQuantity": 12,
+    "imageUrl": "https://picsum.photos/600/600?random=73",
+    "categoryId": 4
+  },
+  {
+    "name": "Xiaomi Smart Air Purifier 4",
+    "description": "منقي هواء ذكي للمنزل يزيل الروائح وحبوب اللقاح والأتربة والفيروسات بفلتر HEPA الفعال.",
+    "price": 5400,
+    "stockQuantity": 25,
+    "imageUrl": "https://picsum.photos/600/600?random=74",
+    "categoryId": 4
+  },
+  {
+    "name": "Nutribullet Pro 900 Blenders",
+    "description": "خلاط قوي لاستخلاص المغذيات وصنع العصائر والسموذي اللذيذ في ثوانٍ معدودة.",
+    "price": 3800,
+    "stockQuantity": 30,
+    "imageUrl": "https://picsum.photos/600/600?random=75",
+    "categoryId": 4
+  },
+  {
+    "name": "Bed Pillow Memory Foam Set",
+    "description": "طقم وسائد طبية ميموري فوم توفر دعماً مثالياً للرقبة والعمود الفقري لنوم هادئ ومريح.",
+    "price": 1900,
+    "stockQuantity": 45,
+    "imageUrl": "https://picsum.photos/600/600?random=76",
+    "categoryId": 4
+  },
+  {
+    "name": "IKEA LED Desk Lamp",
+    "description": "مصباح مكتب ليد بتصميم كلاسيكي يوفر إضاءة مركزة ومريحة للعين أثناء الدراسة والعمل.",
+    "price": 850,
+    "stockQuantity": 50,
+    "imageUrl": "https://picsum.photos/600/600?random=77",
+    "categoryId": 4
+  },
+  {
+    "name": "Cosy Cotton Throw Blanket",
+    "description": "بطانية سرير خفيفة ودافئة مصنوعة من قطن ناعم منسوج تضفي لمسة جمالية على غرفة المعيشة.",
+    "price": 1200,
+    "stockQuantity": 35,
+    "imageUrl": "https://picsum.photos/600/600?random=78",
+    "categoryId": 4
+  },
+  {
+    "name": "Stainless Steel Kitchen Organizer",
+    "description": "منظم مطبخ معدني للأطباق وأدوات الطهي يوفر المساحة ويمنح مطبخك مظهراً مرتباً.",
+    "price": 1600,
+    "stockQuantity": 40,
+    "imageUrl": "https://picsum.photos/600/600?random=79",
+    "categoryId": 4
+  },
+  {
+    "name": "Minimalist Wall Clock",
+    "description": "ساعة حائط كلاسيكية بتصميم بسيط عصري بدون إطار وصامتة لا تصدر صوت دقات.",
+    "price": 750,
+    "stockQuantity": 60,
+    "imageUrl": "https://picsum.photos/600/600?random=80",
+    "categoryId": 4
+  },
+  {
+    "name": "Crockpot Slow Cooker 6L",
+    "description": "حلة طهي بطيء كهربائية لتحضير ألذ اليخنات والوجبات ببطء مع الاحتفاظ بالنكهات الغنية.",
+    "price": 2800,
+    "stockQuantity": 20,
+    "imageUrl": "https://picsum.photos/600/600?random=81",
+    "categoryId": 4
+  },
+  {
+    "name": "Brita Water Filter Pitcher 2.4L",
+    "description": "إبريق فلترة المياه المنزلي يزيل الكلور والشوائب ليوفر لك مياه شرب نظيفة وصحية.",
+    "price": 1500,
+    "stockQuantity": 30,
+    "imageUrl": "https://picsum.photos/600/600?random=82",
+    "categoryId": 4
+  },
+  {
+    "name": "Black & Decker Garment Steamer",
+    "description": "مكواة بخار عامودية للملابس بقوة عالية لإزالة التجاعيد الصعبة من جميع أنواع الأقمشة بسرعة.",
+    "price": 3400,
+    "stockQuantity": 22,
+    "imageUrl": "https://picsum.photos/600/600?random=83",
+    "categoryId": 4
+  },
+  {
+    "name": "Aromatherapy Diffuser 500ml",
+    "description": "فواحة عطرية ومرطب هواء بالأشعة فوق الصوتية وإضاءة LED بألوان مهدئة للأعصاب.",
+    "price": 950,
+    "stockQuantity": 50,
+    "imageUrl": "https://picsum.photos/600/600?random=84",
+    "categoryId": 4
+  },
+  {
+    "name": "Tefal Non-Stick Pots Set",
+    "description": "طقم حلل وأواني طهي تيفال غير لاصقة 8 قطع لتجربة طبخ سهلة وسريعة التنظيف.",
+    "price": 6200,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=85",
+    "categoryId": 4
+  },
+  {
+    "name": "DeLonghi Dedica Espresso Machine",
+    "description": "صانعة قهوة إسبريسو وكابتشينو يدوية بتصميم معدني أنيق ومضخة ضغط 15 بار احترافية.",
+    "price": 11500,
+    "stockQuantity": 10,
+    "imageUrl": "https://picsum.photos/600/600?random=86",
+    "categoryId": 4
+  },
+  {
+    "name": "Modern Wooden Coffee Table",
+    "description": "طاولة قهوة لغرفة المعيشة مصنوعة من الخشب الطبيعي المقاوم للخدش بتصميم عصري راقٍ.",
+    "price": 4800,
+    "stockQuantity": 12,
+    "imageUrl": "https://picsum.photos/600/600?random=87",
+    "categoryId": 4
+  },
+  {
+    "name": "Bamboo Bath Mat",
+    "description": "سجادة حمام مصنوعة من خشب البامبو الطبيعي المقاوم للماء والعفن تمنح حمامك مظهر سبا فاخر.",
+    "price": 1100,
+    "stockQuantity": 30,
+    "imageUrl": "https://picsum.photos/600/600?random=88",
+    "categoryId": 4
+  },
+  {
+    "name": "Silent Desk Fan 12 Inch",
+    "description": "مروحة مكتب صغيرة هادئة للغاية ومثالية لغرفة النوم أو طاولة العمل مع 3 سرعات قابلة للتعديل.",
+    "price": 1300,
+    "stockQuantity": 25,
+    "imageUrl": "https://picsum.photos/600/600?random=89",
+    "categoryId": 4
+  },
+  {
+    "name": "Ring Video Doorbell Plus",
+    "description": "جرس باب ذكي بكاميرا فيديو عالية الدقة ومستشعر حركة لمراقبة مدخل منزلك عن بعد عبر الهاتف.",
+    "price": 6900,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=90",
+    "categoryId": 4
+  },
+  {
+    "name": "PlayStation 5 Slim 1TB",
+    "description": "جهاز ألعاب بلايستيشن 5 سليم الجديد بنسخة الأقراص، سعة تخزين 1 تيرابايت لتجربة ألعاب لا مثيل لها.",
+    "price": 28000,
+    "stockQuantity": 14,
+    "imageUrl": "https://picsum.photos/600/600?random=17",
+    "categoryId": 5
+  },
+  {
+    "name": "Nintendo Switch OLED Model",
+    "description": "شاشة OLED مقاس 7 بوصة ألوان زاهية وتباين عميق لتستمتع باللعب في أي مكان.",
+    "price": 16500,
+    "stockQuantity": 18,
+    "imageUrl": "https://picsum.photos/600/600?random=18",
+    "categoryId": 5
+  },
+  {
+    "name": "ASUS ROG Ally Handheld",
+    "description": "جهاز ألعاب محمول قوي بنظام ويندوز 11 لتشغيل جميع ألعاب الكمبيوتر أينما كنت.",
+    "price": 27500,
+    "stockQuantity": 16,
+    "imageUrl": "https://picsum.photos/600/600?random=28",
+    "categoryId": 5
+  },
+  {
+    "name": "Xbox Series X Console",
+    "description": "أسرع وأقوى أجهزة إكس بوكس على الإطلاق مع دقة 4K الحقيقية ومحرك أقراص Blu-ray.",
+    "price": 29900,
+    "stockQuantity": 10,
+    "imageUrl": "https://picsum.photos/600/600?random=92",
+    "categoryId": 5
+  },
+  {
+    "name": "DualSense Edge Controller",
+    "description": "يد تحكم لاسلكية احترافية لجهاز بلايستيشن 5 قابلة للتخصيص الكامل لأداء لعب أسرع.",
+    "price": 9500,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=93",
+    "categoryId": 5
+  },
+  {
+    "name": "SteelSeries Arctis Nova Pro",
+    "description": "سماعة ألعاب لاسلكية خارقة الجودة مع نظام إلغاء ضوضاء فعال متوافقة مع بلايستيشن والكمبيوتر.",
+    "price": 16500,
+    "stockQuantity": 12,
+    "imageUrl": "https://picsum.photos/600/600?random=94",
+    "categoryId": 5
+  },
+  {
+    "name": "Razer BlackWidow V4 Pro",
+    "description": "كيبورد ألعاب ميكانيكي راقٍ مع إضاءة Chroma RGB ومفاتيح Razer الخضراء الميكانيكية.",
+    "price": 11800,
+    "stockQuantity": 20,
+    "imageUrl": "https://picsum.photos/600/600?random=95",
+    "categoryId": 5
+  },
+  {
+    "name": "Logitech G Pro X Superlight 2",
+    "description": "الماوس الرياضي اللاسلكي الأفضل لبطولات الألعاب الاحترافية فائق خفة الوزن.",
+    "price": 7900,
+    "stockQuantity": 25,
+    "imageUrl": "https://picsum.photos/600/600?random=96",
+    "categoryId": 5
+  },
+  {
+    "name": "Secretlab TITAN Evo Chair",
+    "description": "كرسي ألعاب مريح للغاية وحاصل على جوائز عديدة، مصمم لتوفير الدعم التام لظهرك.",
+    "price": 24500,
+    "stockQuantity": 6,
+    "imageUrl": "https://picsum.photos/600/600?random=97",
+    "categoryId": 5
+  },
+  {
+    "name": "MSI Optix 32 Inch Curved TV",
+    "description": "شاشة ألعاب منحنية ومعدل تحديث 165 هرتز وزمن استجابة 1 ملي ثانية لتجربة لعب مثالية.",
+    "price": 14500,
+    "stockQuantity": 8,
+    "imageUrl": "https://picsum.photos/600/600?random=99",
+    "categoryId": 5
+  },
+  {
+    "name": "Meta Quest 3 VR Headset",
+    "description": "نظارة الواقع الافتراضي والمختلط المستقلة الأحدث بوضوح بصري فائق وأداء مضاعف.",
+    "price": 27000,
+    "stockQuantity": 10,
+    "imageUrl": "https://picsum.photos/600/600?random=102",
+    "categoryId": 5
+  },
+  {
+    "name": "Elgato Stream Deck MK.2",
+    "description": "واجهة تحكم للمنتجين وصناع المحتوى بـ 15 مفتاح LCD قابلة للتخصيص للتحكم في البث.",
+    "price": 6800,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=103",
+    "categoryId": 5
+  },
+  {
+    "name": "Xbox Wireless Controller",
+    "description": "يد تحكم إكس بوكس اللاسلكية الكلاسيكية بلون أسود كربون وتصميم مريح ومحسّن.",
+    "price": 3500,
+    "stockQuantity": 40,
+    "imageUrl": "https://picsum.photos/600/600?random=104",
+    "categoryId": 5
+  },
+  {
+    "name": "Razer Nommo V2 Speakers",
+    "description": "مكبرات صوت ثلاثية الأبعاد للألعاب مع مضخم صوت لاسلكي وإضاءة خلفية متزامنة.",
+    "price": 12500,
+    "stockQuantity": 11,
+    "imageUrl": "https://picsum.photos/600/600?random=105",
+    "categoryId": 5
+  },
+  {
+    "name": "WD_BLACK 2TB SN850X SSD",
+    "description": "ذاكرة تخزين داخلية فائقة السرعة مع مبرد حراري مصممة خصيصاً لجهاز PS5 والكمبيوتر.",
+    "price": 8200,
+    "stockQuantity": 22,
+    "imageUrl": "https://picsum.photos/600/600?random=106",
+    "categoryId": 5
+  },
+  {
+    "name": "Elgato HD60 X Capture Card",
+    "description": "كرت التقاط وتسجيل ألعاب خارجي بدقة 4K للبث المباشر من بلايستيشن وإكس بوكس وسويتش.",
+    "price": 9400,
+    "stockQuantity": 14,
+    "imageUrl": "https://picsum.photos/600/600?random=107",
+    "categoryId": 5
+  },
+  {
+    "name": "HyperX QuadCast S Mic",
+    "description": "ميكروفون يو إس بي مكثف مع إضاءة RGB رائعة وقاعدة ماصة للصدمات للبث المباشر.",
+    "price": 7500,
+    "stockQuantity": 18,
+    "imageUrl": "https://picsum.photos/600/600?random=108",
+    "categoryId": 5
+  },
+  {
+    "name": "Corsair Dominant 32GB RAM",
+    "description": "ذاكرة عشوائية DDR5 عالية الأداء ومخصصة لأجهزة الكمبيوتر للألعاب شديدة القوة.",
+    "price": 6800,
+    "stockQuantity": 25,
+    "imageUrl": "https://picsum.photos/600/600?random=109",
+    "categoryId": 5
+  },
+  {
+    "name": "Razer Leviathan V2 Soundbar",
+    "description": "ساوند بار ألعاب مدمج متعدد المشغلات مع مضخم صوت وإضاءة Chroma RGB رائعة.",
+    "price": 10500,
+    "stockQuantity": 13,
+    "imageUrl": "https://picsum.photos/600/600?random=110",
+    "categoryId": 5
+  },
+  {
+    "name": "Logitech G Fits Earbuds",
+    "description": "سماعات ألعاب لاسلكية داخل الأذن مخصصة مع تقنية التشكيل الضوئي لمطابقة أذنك تماماً.",
+    "price": 9200,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=111",
+    "categoryId": 5
+  },
+  {
+    "name": "Bowflex Adjustable Dumbbells",
+    "description": "دمبل قابل للتعديل يغنيك عن 15 زوجاً من الأثقال، مثالي لتوفير المساحة في صالة التمارين المنزلية.",
+    "price": 14500,
+    "stockQuantity": 10,
+    "imageUrl": "https://picsum.photos/600/600?random=51",
+    "categoryId": 6
+  },
+  {
+    "name": "Manduka PRO Yoga Mat",
+    "description": "سجادة يوجا احترافية عالية الكثافة توفر دعماً للمفاصل وثباتاً تاماً لمنع الانزلاق.",
+    "price": 3800,
+    "stockQuantity": 20,
+    "imageUrl": "https://picsum.photos/600/600?random=52",
+    "categoryId": 6
+  },
+  {
+    "name": "Fitbit Charge 6 Tracker",
+    "description": "سوار رياضي ذكي لتتبع نبضات القلب والأنشطة اليومية والتمارين والنوم مع نظام تحديد مواقع مدمج.",
+    "price": 7200,
+    "stockQuantity": 30,
+    "imageUrl": "https://picsum.photos/600/600?random=53",
+    "categoryId": 6
+  },
+  {
+    "name": "TRX All-in-One Suspension",
+    "description": "نظام حبال تعليق للتمارين المنزلية باستخدام وزن الجسم لتقوية كامل عضلات الجسم.",
+    "price": 5400,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=54",
+    "categoryId": 6
+  },
+  {
+    "name": "Wilson Evolution Basketball",
+    "description": "كرة السلة الأشهر للملاعب الداخلية بملمس جلدي ناعم وتحكم فائق بالكرة.",
+    "price": 2900,
+    "stockQuantity": 25,
+    "imageUrl": "https://picsum.photos/600/600?random=55",
+    "categoryId": 6
+  },
+  {
+    "name": "Garmin Fenix 7 Solar",
+    "description": "ساعة ذكية للمغامرات تعمل بالشحن الشمسي، نظام خرائط دقيق وعمر بطارية خارق للأنشطة الخارجية.",
+    "price": 32000,
+    "stockQuantity": 8,
+    "imageUrl": "https://picsum.photos/600/600?random=56",
+    "categoryId": 6
+  },
+  {
+    "name": "Nike Gym Glove Extreme",
+    "description": "قفازات جيم نايكي مبطنة لحماية اليدين ومنع الكالو وتوفير ثبات قوي أثناء رفع الأثقال.",
+    "price": 950,
+    "stockQuantity": 50,
+    "imageUrl": "https://picsum.photos/600/600?random=57",
+    "categoryId": 6
+  },
+  {
+    "name": "Under Armour Gym Bag",
+    "description": "حقيبة ظهر وحقيبة يد جيم مزدوجة مقاومة للماء مع قسم خاص لعزل الأحذية والملابس المتسخة.",
+    "price": 2400,
+    "stockQuantity": 30,
+    "imageUrl": "https://picsum.photos/600/600?random=58",
+    "categoryId": 6
+  },
+  {
+    "name": "Hydro Flask Water Bottle 1L",
+    "description": "زجاجة مياه رياضية عازلة للحرارة مصنوعة من الفولاذ المقاوم للصدأ تحفظ البرودة لـ 24 ساعة.",
+    "price": 1800,
+    "stockQuantity": 40,
+    "imageUrl": "https://picsum.photos/600/600?random=59",
+    "categoryId": 6
+  },
+  {
+    "name": "Theragun Mini Massage Gun",
+    "description": "جهاز مساج وتدليك عضلات محمول لتخفيف التشنج وتسريع الاستشفاء العضلي بعد التمارين الشاقة.",
+    "price": 9800,
+    "stockQuantity": 12,
+    "imageUrl": "https://picsum.photos/600/600?random=60",
+    "categoryId": 6
+  },
+  {
+    "name": "Decathlon 2-Second Tent",
+    "description": "خيمة تخييم سريعة الفتح تتسع لشخصين مناسبة للرحلات الجبلية والبرية وتتحمل الرياح والمطر.",
+    "price": 4500,
+    "stockQuantity": 10,
+    "imageUrl": "https://picsum.photos/600/600?random=61",
+    "categoryId": 6
+  },
+  {
+    "name": "Adidas Football Conext 24",
+    "description": "كرة قدم أديداس بجودة عالية معتمدة من الفيفا للمباريات الرسمية والملاعب العشبية.",
+    "price": 1900,
+    "stockQuantity": 35,
+    "imageUrl": "https://picsum.photos/600/600?random=62",
+    "categoryId": 6
+  },
+  {
+    "name": "CamelBak Rogue Hydration Pack",
+    "description": "حقيبة ظهر مدمج بها خزان ماء سعة 2.5 لتر مع أنبوب شرب لراكبي الدراجات والجري الطويل.",
+    "price": 3100,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=63",
+    "categoryId": 6
+  },
+  {
+    "name": "Speedo Vanquisher Goggles",
+    "description": "نظارات سباحة احترافية مضادة للضباب والوهج الشمسي وتوفر حماية واسعة للعينين.",
+    "price": 1100,
+    "stockQuantity": 40,
+    "imageUrl": "https://picsum.photos/600/600?random=64",
+    "categoryId": 6
+  },
+  {
+    "name": "Everlast Elite Training Gloves",
+    "description": "قفازات ملاكمة احترافية من إيفرلاست توفر حماية فائقة للمعصم ومثالية للتمارين وحقيبة الرمل.",
+    "price": 2800,
+    "stockQuantity": 20,
+    "imageUrl": "https://picsum.photos/600/600?random=65",
+    "categoryId": 6
+  },
+  {
+    "name": "TriggerPoint GRID Foam Roller",
+    "description": "فوم رولر مساج لتخفيف آلام عضلات الظهر والفخذين وتحسين المرونة البدنية.",
+    "price": 1400,
+    "stockQuantity": 30,
+    "imageUrl": "https://picsum.photos/600/600?random=66",
+    "categoryId": 6
+  },
+  {
+    "name": "Spalding NBA Over-The-Door Hoop",
+    "description": "طوق كرة سلة صغير يعلق فوق الباب للغرف أو المكاتب الترفيهية مع كرة مطاطية صغيرة.",
+    "price": 1700,
+    "stockQuantity": 25,
+    "imageUrl": "https://picsum.photos/600/600?random=67",
+    "categoryId": 6
+  },
+  {
+    "name": "Shimano Cycling Shoes",
+    "description": "حذاء ركوب دراجات هوائية احترافي متوافق مع الدواسات المغناطيسية لتوفير طاقة بدنية أفضل.",
+    "price": 4900,
+    "stockQuantity": 14,
+    "imageUrl": "https://picsum.photos/600/600?random=68",
+    "categoryId": 6
+  },
+  {
+    "name": "Giro Fixture Helmet",
+    "description": "خوذة حماية لراكبي الدراجات بفتحات تهوية وتصميم مريح يحمي الرأس من الصدمات والكسور.",
+    "price": 2300,
+    "stockQuantity": 22,
+    "imageUrl": "https://picsum.photos/600/600?random=69",
+    "categoryId": 6
+  },
+  {
+    "name": "Cap Barbell Olympic Barbell 20kg",
+    "description": "بار أوليمبي حديد صلب لتمارين رفع الأثقال وتدريب القوة يتحمل أوزاناً ثقيلة جداً.",
+    "price": 6500,
+    "stockQuantity": 15,
+    "imageUrl": "https://picsum.photos/600/600?random=70",
+    "categoryId": 6
+  }
+]

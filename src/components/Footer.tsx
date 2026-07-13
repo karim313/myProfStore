@@ -22,7 +22,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="w-full bg-[#00221C] text-gray-300 pt-16 mt-auto border-t border-[#00342B]" dir="rtl">
+    <footer className="w-full bg-[#00221C] text-gray-300 pt-16 mt-auto border-t border-[#00342B] " dir="rtl">
 
       {/* 1. TRUST FEATURES BANNER */}
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 border-b border-[#00342B]/60">

@@ -4,6 +4,7 @@ import Home from './pages/Home/Home';
 import Category from './pages/Categories/Category';
 import Cart from './pages/Cart/Cart';
 import Layout from './Layouts/Layout';
+import Dashboard from './pages/dashborad/Dashboard';
 
 
 function App() {
@@ -14,7 +15,10 @@ function App() {
         index: true,
         element: <Home></Home>
       },
-      
+      {
+        path: "/dashboard",
+        element:<Dashboard></Dashboard>
+      },
     {
       path:"/category",
       element:<Category></Category>

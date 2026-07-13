@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, Sparkles, User, Bot } from 'lucide-react'
+import { sendChatMessage } from '../../api/axios'
 
 interface AIAssistantDrawerProps {
   isOpen: boolean
@@ -8,27 +9,34 @@ interface AIAssistantDrawerProps {
 }
 
 export default function AIAssistantDrawer({ isOpen, onClose }: AIAssistantDrawerProps) {
-  // Mock chat state
   const [messages, setMessages] = useState([
     { role: 'assistant', text: 'أهلاً بك! كيف يمكنني مساعدتك في اختيار المنتج المناسب اليوم؟' }
   ])
   const [input, setInput] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!input.trim()) return
 
-    // Add user message
-    setMessages(prev => [...prev, { role: 'user', text: input }])
+    const userMessage = input.trim()
+    const nextHistory = [...messages, { role: 'user', text: userMessage }]
+    setMessages(nextHistory)
     setInput('')
+    setIsLoading(true)
 
-    // Simulate AI thinking and replying
-    setTimeout(() => {
+    try {
+      const { response } = await sendChatMessage(userMessage, nextHistory)
+      setMessages(prev => [...prev, { role: 'assistant', text: response }])
+    } catch (error) {
+      console.error('Failed to send chat message:', error)
       setMessages(prev => [
-        ...prev, 
-        { role: 'assistant', text: 'أنا أحلل طلبك الآن... سأعرض لك أفضل الخيارات التي تناسب ذوقك قريباً.' }
+        ...prev,
+        { role: 'assistant', text: 'عذراً، لا يتوفر خادم الدردشة حالياً. سأظل أساعدك عبر المنتجات المتاحة في المتجر.' }
       ])
-    }, 1000)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -90,6 +98,16 @@ export default function AIAssistantDrawer({ isOpen, onClose }: AIAssistantDrawer
                   </div>
                 </div>
               ))}
+              {isLoading && (
+                <div className="flex gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                    <Bot size={16} />
+                  </div>
+                  <div className="bg-white text-gray-700 border border-gray-100 rounded-2xl rounded-tr-none px-3.5 py-3 text-sm shadow-sm">
+                    جاري التفكير في أفضل اقتراح...
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* ── Input Area ── */}
@@ -104,7 +122,7 @@ export default function AIAssistantDrawer({ isOpen, onClose }: AIAssistantDrawer
                 />
                 <button
                   type="submit"
-                  disabled={!input.trim()}
+                  disabled={!input.trim() || isLoading}
                   className="absolute left-2 w-10 h-10 flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 disabled:bg-gray-300 text-white rounded-full transition-colors cursor-pointer"
                 >
                   <Send size={16} style={{ transform: 'rotate(180deg)' }} />

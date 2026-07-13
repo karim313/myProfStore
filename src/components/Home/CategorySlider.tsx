@@ -5,13 +5,14 @@ import { products } from '../../data/products'
 
 // ─── Derived Data ─────────────────────────────────────────────────────────────
 // One product per unique category — used as cover card
-const coverCategories = products.filter(
+
+
+// ─── Component ────────────────────────────────────────────────────────────────
+export default function CategorySlider({ allProducts }: { allProducts: any[] }) {
+  const coverCategories = allProducts.filter(
   (product, index, array) =>
     index === array.findIndex(item => item.category === product.category)
 )
-
-// ─── Component ────────────────────────────────────────────────────────────────
-export default function CategorySlider() {
   const navigate = useNavigate()
   const sliderRef = useRef<HTMLDivElement>(null)
   const [scrollProgress, setScrollProgress] = useState(0)
@@ -103,7 +104,7 @@ export default function CategorySlider() {
             >
               <picture className='w-full h-[100%]'>
                 <img
-                  src={cat.imageCover}
+                  src={cat.imageUrl}
                   alt={cat.category}
                   className='w-full h-[100%] object-cover rounded-xl'
                 />

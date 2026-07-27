@@ -1,40 +1,41 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiZap } from 'react-icons/fi'
-import { FaStar } from 'react-icons/fa'
 import { ArrowRight } from 'lucide-react'
-import { products } from '../../data/products'
+import { getPrimaryImage } from '../../lib/productMedia'
 
-// ─── Derived Data ─────────────────────────────────────────────────────────────
-// Sort by highest discount percentage, take top 4
-const saleProducts = [...products]
-  .filter(p => p.originalPrice > p.price)
-  .sort(
-    (a, b) =>
-      (b.originalPrice - b.price) / b.originalPrice -
-      (a.originalPrice - a.price) / a.originalPrice
-  )
-  .slice(0, 4)
 
 // ─── Component ────────────────────────────────────────────────────────────────
-export default function FlashSale() {
+export default function FlashSale({highestDiscountProducts}: {highestDiscountProducts: any[]}) {
   const navigate = useNavigate()
-
-  // Countdown — starts at 2h 59m 59s
-  const [timeLeft, setTimeLeft] = useState({ h: 2, m: 59, s: 59 })
+  const [countdowns, setCountdowns] = useState<Record<number, { h: number; m: number; s: number }>>({})
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev.s > 0) return { ...prev, s: prev.s - 1 }
-        if (prev.m > 0) return { ...prev, m: prev.m - 1, s: 59 }
-        if (prev.h > 0) return { h: prev.h - 1, m: 59, s: 59 }
-        clearInterval(timer)
-        return { h: 0, m: 0, s: 0 }
+      const now = new Date().getTime()
+      const newCountdowns: Record<number, { h: number; m: number; s: number }> = {}
+
+      highestDiscountProducts.forEach(pro => {
+        if (pro.offerEndDate) {
+          const endDate = new Date(pro.offerEndDate).getTime()
+          const distance = endDate - now
+
+          if (distance > 0) {
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000)
+            newCountdowns[pro.id] = { h: hours, m: minutes, s: seconds }
+          } else {
+            newCountdowns[pro.id] = { h: 0, m: 0, s: 0 }
+          }
+        }
       })
+
+      setCountdowns(newCountdowns)
     }, 1000)
+
     return () => clearInterval(timer)
-  }, [])
+  }, [highestDiscountProducts])
 
   return (
     <section
@@ -55,25 +56,12 @@ export default function FlashSale() {
             </div>
             <h2 className='text-3xl font-extrabold text-[#00342B]'>تخفيضات اليوم</h2>
           </div>
-
-          {/* Live countdown */}
-          <div className='flex items-center gap-3'>
-            <span className='text-gray-500 text-sm'>ينتهي خلال:</span>
-            {[timeLeft.h, timeLeft.m, timeLeft.s].map((unit, i) => (
-              <div key={i} className='flex flex-col items-center'>
-                <div className='bg-[#00342B] text-white font-mono font-bold text-xl w-14 h-14 rounded-xl flex items-center justify-center shadow-md'>
-                  {String(unit).padStart(2, '0')}
-                </div>
-                <span className='text-gray-400 text-xs mt-1'>{['س', 'د', 'ث'][i]}</span>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* ── Products Grid ── */}
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5'>
-          {saleProducts.map(pro => {
-            const discount = Math.round((1 - pro.price / pro.originalPrice) * 100)
+          {highestDiscountProducts.map(pro => {
+            const discount = pro.discountPercentage || Math.round((1 - pro.finalPrice / pro.originalPrice) * 100)
             return (
               <div
                 key={pro.id}
@@ -88,8 +76,8 @@ export default function FlashSale() {
                 {/* Image */}
                 <picture className='image w-full h-[200px] relative overflow-hidden addToCart'>
                   <img
-                    src={pro.imageCover}
-                    alt={pro.title}
+                    src={getPrimaryImage(pro)}
+                    alt={pro.name}
                     className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-500'
                   />
                 </picture>
@@ -98,22 +86,35 @@ export default function FlashSale() {
                 <div className='flex flex-col items-end p-4 gap-1'>
                   <span className='text-gray-400 text-xs'>{pro.category}</span>
                   <h5 className='font-semibold text-[#00342B] text-right w-full text-sm leading-snug line-clamp-1'>
-                    {pro.title}
+                    {pro.name}
                   </h5>
                   <div className='flex justify-between items-center w-full mt-2'>
                     <div className='flex flex-col items-start'>
                       <span className='font-extrabold text-[#00342B] text-base'>
-                        {pro.price.toLocaleString()} د.ع
+                        ${pro.finalPrice.toLocaleString()}
                       </span>
                       <span className='text-gray-400 text-xs line-through'>
-                        {pro.originalPrice.toLocaleString()}
+                        ${pro.originalPrice.toLocaleString()}
                       </span>
                     </div>
-                    <div className='flex items-center gap-1'>
-                      <span className='text-gray-500 text-xs'>{pro.rating}</span>
-                      <FaStar className='text-yellow-400 text-xs' />
-                    </div>
                   </div>
+                  {/* Individual Countdown */}
+                  {pro.offerEndDate && countdowns[pro.id] && (
+                    <div className='flex items-center gap-1 mt-2 w-full justify-end'>
+                      <span className='text-gray-400 text-xs'>ينتهي:</span>
+                      <div className='flex items-center gap-1'>
+                        <span className='bg-red-100 text-red-600 text-xs font-bold px-1.5 py-0.5 rounded'>
+                          {String(countdowns[pro.id].h).padStart(2, '0')}س
+                        </span>
+                        <span className='bg-red-100 text-red-600 text-xs font-bold px-1.5 py-0.5 rounded'>
+                          {String(countdowns[pro.id].m).padStart(2, '0')}د
+                        </span>
+                        <span className='bg-red-100 text-red-600 text-xs font-bold px-1.5 py-0.5 rounded'>
+                          {String(countdowns[pro.id].s).padStart(2, '0')}ث
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )

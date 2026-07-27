@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiZap } from 'react-icons/fi'
 import { FaStar } from 'react-icons/fa'
@@ -14,7 +14,7 @@ export default function FlashSale({ products }: { products: Product[] }) {
     return {
       ...item,
       title: item.name || item.title || '',
-      imageCover: item.imageUrl || item.imageCover || '',
+      imageCover: item.mainImage || item.imageCover || '',
       price,
       originalPrice,
       rating: item.rating || (4.0 + (item.id % 5) * 0.2),

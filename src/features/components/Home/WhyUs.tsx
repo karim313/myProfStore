@@ -1,4 +1,3 @@
-import React from 'react'
 import { FiTruck, FiShield, FiHeadphones } from 'react-icons/fi'
 
 // ─── Data ─────────────────────────────────────────────────────────────────────

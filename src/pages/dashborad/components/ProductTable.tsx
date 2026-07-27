@@ -1,15 +1,6 @@
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  imageUrl: string;
-  stockQuantity: number;
-  category: string;
-  originalPrice: number;
-  discountPercentage: number | null;
-  finalPrice: number;
-  offerEndDate: string | null;
-}
+import { getPrimaryImage, type ProductMedia } from '../../../lib/productMedia';
+
+interface Product extends ProductMedia {}
 
 interface ProductTableProps {
   products: Product[];
@@ -37,7 +28,7 @@ export default function ProductTable({ products, getCategoryName, onEdit, onDele
             {products.map(product => (
               <tr key={product.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4">
-                  <img src={product.imageUrl} alt={product.name} className="w-12 h-12 rounded-lg object-cover" />
+                  <img src={getPrimaryImage(product)} alt={product.name} className="w-12 h-12 rounded-lg object-cover bg-gray-100" />
                 </td>
                 <td className="px-6 py-4">
                   <div className="font-semibold text-gray-800 text-sm">{product.name}</div>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { User, Sparkles } from 'lucide-react';
 
 export default function AvatarOrb({ isAi = false }: { isAi?: boolean }) {

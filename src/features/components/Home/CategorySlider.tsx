@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import type { Product } from '../../../data/products'
@@ -110,7 +110,7 @@ export default function CategorySlider({ products }: { products: Product[] }) {
             >
               <picture className='w-full h-[100%]'>
                 <img
-                  src={cat.imageUrl || (cat as any).imageCover}
+                  src={cat.mainImage || (cat as any).imageCover || ''}
                   alt={cat.category}
                   className='w-full h-[100%] object-cover rounded-xl'
                 />

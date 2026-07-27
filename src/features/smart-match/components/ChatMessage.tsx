@@ -1,4 +1,3 @@
-import React from 'react';
 import AvatarOrb from './AvatarOrb';
 
 export default function ChatMessage({ text, isAi = false }: { text: string; isAi?: boolean }) {

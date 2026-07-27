@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { FaStar } from "react-icons/fa";
 import { addReview } from "../../api/axios";
+import { useReviewedProducts } from "../../Context/ReviewedProductsContext";
+import { getPrimaryImage } from "@/lib/productMedia";
+import axios from "axios";
 import {
   Dialog,
   DialogContent,
@@ -25,32 +28,49 @@ export default function ProductReviewsDialog({
 }: Props) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const { refreshReviewedProducts } = useReviewedProducts();
 
-  // add review 
+  // add review
   const handleAddReview = async () => {
+    setError(null);
     try {
-      const res = await addReview({
+      console.log({
         productId,
         rating,
         comment,
       });
+
+      const res = await addReview(productId!, {
+        rating,
+        comment,
+      });
+
       console.log(res);
+      await refreshReviewedProducts();
       setOpen(false);
     } catch (error) {
-      console.error(error);
+      if (axios.isAxiosError(error)) {
+        console.log("Status:", error.response?.status);
+        console.log("Response:", error.response?.data);
+        const errorMessage = error.response?.data?.message || error.response?.data || "فشل إضافة التقييم";
+        setError(errorMessage);
+      } else {
+        console.error(error);
+        setError("حدث خطأ غير متوقع");
+      }
     }
   };
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-right">تقييمات المنتج</DialogTitle>
+          <DialogTitle className="text-right mt-5">تقييمات المنتج</DialogTitle>
         </DialogHeader>
 
         <div className="flex gap-4 items-center border-b pb-4">
           <img
-            src={product?.imageUrl}
+            src={getPrimaryImage(product)}
             alt={product?.name}
             className="w-20 h-20 rounded-lg object-cover"
           />
@@ -89,6 +109,11 @@ export default function ProductReviewsDialog({
         </div>
 
         <div className="mt-6 border-t pt-4">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+              {error}
+            </div>
+          )}
           <h3 className="font-semibold mb-3">أضف تقييمك</h3>
           <div className="flex gap-1 mb-3">
             {[1, 2, 3, 4, 5].map((star) => (
@@ -109,7 +134,7 @@ export default function ProductReviewsDialog({
             placeholder="اكتب تعليقك..."
             className="w-full border rounded-lg p-3 outline-none"
           />
-          <button className="mt-3 w-full bg-[#00342B] text-white py-2 rounded-lg">
+          <button className="mt-3 w-full bg-[#00342B] text-white py-2 rounded-lg" onClick={handleAddReview}>
             إرسال التقييم
           </button>
         </div>

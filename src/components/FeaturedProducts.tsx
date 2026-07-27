@@ -1,5 +1,6 @@
-import React from 'react'
 import type { Product } from '../data/products'
+
+import { getPrimaryImage } from '../lib/productMedia'
 
 // ── Badge ──────────────────────────────────────────────────────────────────
 interface BadgeProps {
@@ -32,21 +33,21 @@ function ProductCard({ product, onSelect, size = 'small' }: ProductCardProps) {
     <button
       type="button"
       onClick={() => onSelect?.(product)}
-      aria-label={`${product.title} — ${product.price.toLocaleString()} د.ع`}
+      aria-label={`${product.name} — ${product.finalPrice.toLocaleString()} د.ع`}
       className="relative rounded-2xl overflow-hidden group w-full h-full text-right
                  focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400
                  focus-visible:ring-offset-2 focus-visible:ring-offset-[#00342B]"
     >
       <img
-        src={product.imageCover}
-        alt={product.title}
+        src={getPrimaryImage(product)}
+        alt={product.name}
         loading="lazy"
         decoding="async"
         className="w-full h-full object-cover transition duration-500 group-hover:scale-105 group-focus-visible:scale-105"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
 
-      <Badge>{product.badge}</Badge>
+      <Badge>{product.offerEndDate ?? undefined}</Badge>
 
       <div className={`absolute bottom-3 right-3 lg:bottom-5 lg:right-5 text-right ${isLarge ? 'lg:bottom-6' : ''}`}>
         <p className={`text-gray-300 ${isLarge ? 'text-sm' : 'text-xs'}`}>{product.category}</p>
@@ -59,16 +60,16 @@ function ProductCard({ product, onSelect, size = 'small' }: ProductCardProps) {
               : 'text-white font-bold text-sm mt-1 line-clamp-2'
           }
         >
-          {product.title}
+          {product.name}
         </h3>
         <div className={`flex justify-end gap-2 ${isLarge ? 'mt-2 lg:mt-3' : 'mt-1'}`}>
-          {product.originalPrice > product.price && (
+          {product.originalPrice > product.finalPrice && (
             <span className={`text-gray-400 line-through ${isLarge ? '' : 'text-xs'}`}>
               {product.originalPrice.toLocaleString()} د.ع
             </span>
           )}
           <span className={`text-emerald-400 font-bold ${size === 'tall' ? 'text-xl' : isLarge ? '' : 'text-sm'}`}>
-            {product.price.toLocaleString()} د.ع
+            {product.finalPrice.toLocaleString()} د.ع
           </span>
         </div>
 
@@ -94,6 +95,12 @@ interface FeaturedProductsProps {
 }
 
 export default function FeaturedProducts({
+  
+  
+
+
+
+
   featuredProducts = [],
   onViewAll,
   onSelectProduct,
@@ -120,9 +127,9 @@ export default function FeaturedProducts({
           </button>
           <div className="text-right">
             <h2 className="text-2xl font-bold text-[#00342B]">
-              <span className="border-b-2 border-[#00342B]">المنتجات</span> المميزة
+              <span className="border-b-2 border-[#00342B]">وصل حديثاً</span>
             </h2>
-            <p className="text-gray-500 text-sm mt-1">منتجات مختارة بعناية لتجربة تسوق استثنائية</p>
+            <p className="text-gray-500 text-sm mt-1">اكتشف أحدث المنتجات التي وصلت لمتجرنا</p>
           </div>
         </div>
 

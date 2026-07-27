@@ -1,19 +1,17 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { getProducts, getProductReview } from "../api/axios"; // عدل المسار
+import { getProducts, getProductReview } from "../api/axios";
+import type { Product, ProductReview } from "../interface";
 
-type ReviewedProduct = {
-  id: number;
-  name: string;
-  imageUrl: string;
-  category: string;
+export type ReviewedProduct = Product & {
   averageRating: number;
   reviewsCount: number;
-  comments: any[];
+  comments: ProductReview[];
 };
 
 type ReviewedProductsContextType = {
   reviewedProducts: ReviewedProduct[];
   loading: boolean;
+  refreshReviewedProducts: () => Promise<void>;
 };
 
 const ReviewedProductsContext = createContext<
@@ -31,26 +29,37 @@ export function ReviewedProductsProvider({
   const getAllReviewed = async () => {
     try {
       const res = await getProducts();
-      const products = res.data.products;
+      const products = Array.isArray(res?.products)
+        ? res.products
+        : Array.isArray(res)
+        ? res
+        : [];
 
-      const result = [];
+      if (!products.length) {
+        console.warn("ReviewedProductsContext: getProducts returned no products", res);
+      }
+
+      const result: ReviewedProduct[] = [];
 
       for (const product of products) {
-        const review = await getProductReview(product.id);
-
-        if (review.reviewsCount > 0) {
-          result.push({
-            ...product,
-            averageRating: review.averageRating,
-            reviewsCount: review.reviewsCount,
-            comments: review.reviews,
-          });
+        try {
+          const review = await getProductReview(product.id);
+          if (review && review.reviewsCount > 0) {
+            result.push({
+              ...product,
+              averageRating: review.averageRating ?? 0,
+              reviewsCount: review.reviewsCount ?? 0,
+              comments: review.comments || (review as any).reviews || [],
+            });
+          }
+        } catch {
+          // Ignore individual review fetch errors
         }
       }
 
       setReviewedProducts(result);
     } catch (err) {
-      console.error(err);
+      console.error("Error fetching reviewed products:", err);
     } finally {
       setLoading(false);
     }
@@ -62,7 +71,7 @@ export function ReviewedProductsProvider({
 
   return (
     <ReviewedProductsContext.Provider
-      value={{ reviewedProducts, loading }}
+      value={{ reviewedProducts, loading, refreshReviewedProducts: getAllReviewed }}
     >
       {children}
     </ReviewedProductsContext.Provider>

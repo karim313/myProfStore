@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { getProducts } from '../../api/axios';
-import type { Product } from '../../data/products';
+import type { Product, ProductsResponse } from '../../interface';
 
 // Simple in-memory cache to prevent redundant API calls
 let cachedProducts: Product[] | null = null;
-let fetchPromise: Promise<Product[]> | null = null;
+let fetchPromise: Promise<ProductsResponse | Product[]> | null = null;
 
 export const useProducts = () => {
   const [products, setProducts] = useState<Product[]>(cachedProducts || []);
@@ -24,10 +24,11 @@ export const useProducts = () => {
 
     fetchPromise
       .then((data) => {
-        // Extra safety: guarantee we always store an array
-        const safeData = Array.isArray(data) ? data : [];
-        cachedProducts = safeData;
-        setProducts(safeData);
+        const productsArray = Array.isArray(data)
+          ? data
+          : (data && Array.isArray((data as ProductsResponse).products) ? (data as ProductsResponse).products : []);
+        cachedProducts = productsArray;
+        setProducts(productsArray);
         setLoading(false);
       })
       .catch((err) => {

@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react'
-import heroImag from '../../assets/hero.png'
+import { useEffect, useState } from 'react'
 import { getCategories, getProducts } from '../../api/axios'
 import { useReviewedProducts } from "../../Context/ReviewedProductsContext";
-import ProductReviewsDialog from '../../components/Dialog/ProductReviewsDialog';
+import ProductReviewsDialog from "@/components/Dialog/ProductReviewsDialog";
+import { getPrimaryImage } from "@/lib/productMedia";
+import ProductCardSkeleton from '../../components/cardLoader/CardLoader';
+import { useNavigate } from 'react-router-dom';
 
 export default function Category() {
-  const { reviewedProducts, loading } = useReviewedProducts();
+  const { reviewedProducts } = useReviewedProducts();
 
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -18,7 +20,12 @@ export default function Category() {
   const getAllProducts = async () => {
     try {
       const res = await getProducts();
-      setAllProducts(res.data.products);
+      const products = Array.isArray(res?.products)
+        ? res.products
+        : Array.isArray(res)
+        ? res
+        : [];
+      setAllProducts(products);
     } catch (error) {
       console.error(error);
     }
@@ -28,7 +35,7 @@ export default function Category() {
   const getAllCategories = async () => {
     try {
       const res = await getCategories();
-      let cats = res.data;
+      let cats = res;
       if (cats && typeof cats === 'object' && !Array.isArray(cats)) {
         cats = cats.data || cats.categories || cats.result || cats.items || [];
       }
@@ -42,6 +49,11 @@ export default function Category() {
     getAllProducts();
     getAllCategories();
   }, []);
+
+  const navigate = useNavigate();
+  const handleProductClick = (productId: number) => {
+    navigate(`/product/${productId}`);
+  };
 
   // ترجع الـ Review الخاص بالمنتج
   const getProductReview = (productId: number) => {
@@ -79,19 +91,29 @@ export default function Category() {
   return <>
     <main className=' my-5 bg-main-color '>
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col-reverse lg:flex-row gap-8 items-start">
+       {
+        categories.length===0 ? (
+          <div className='flex-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6 '>  
+            <ProductCardSkeleton/>
+            <ProductCardSkeleton/>
+            <ProductCardSkeleton/>
+          </div>
+        ) : (
         <div className="displayProducts flex-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
           {
             filteredProducts.map((product, index) => {
               const review = getProductReview(product.id);
 
               return (
-                <div key={index} className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                <div key={index} className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
+                
+                >
 
                   {/* Image */}
-                  <div className="relative overflow-hidden">
+                  <div className="relative overflow-hidden" onClick={() => handleProductClick(product.id)}>
 
                     <img
-                      src={product.imageUrl}
+                      src={getPrimaryImage(product)}
                       alt={product.name}
                       className="w-full h-60 md:h-64 lg:h-72 object-cover transition duration-500 group-hover:scale-110"
                     />
@@ -116,7 +138,7 @@ export default function Category() {
                         <>
                           <div className="flex items-center gap-2">
                             <span className="text-yellow-500">⭐</span>
-                            <span>{review.averageRating}</span>
+                            <span>{review.averageRating.toFixed(0)}</span>
                             <span className="text-gray-500">
                               ({review.reviewsCount})
                             </span>
@@ -169,6 +191,13 @@ export default function Category() {
           />
 
         </div>
+        )
+
+       }
+       
+        
+       
+       
         <div className="layoutCategories w-full lg:w-[300px] lg:sticky lg:top-24 self-start bg-white rounded-2xl border border-gray-100 shadow-lg p-6">
 
           {/* Title */}
@@ -183,46 +212,18 @@ export default function Category() {
 
           {/* Categories */}
           <div className="space-y-3">
-
-            {/* All */}
-            <label
-              htmlFor="all"
-              className="flex items-center justify-between cursor-pointer rounded-xl px-3 py-3 hover:bg-[#F5F8F7] transition"
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="w-full border border-gray-300 rounded-xl p-3 text-right bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#00342B] cursor-pointer"
             >
-              <span className="font-medium text-gray-700">الكل</span>
-              <input
-                type="radio"
-                name="category"
-                id="all"
-                value="all"
-                checked={selectedCategory === "all"}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="accent-[#00342B] w-4 h-4"
-              />
-            </label>
-
-            {categories.map((category: any) => (
-              <label
-                key={category.id}
-                htmlFor={category.id.toString()}
-                className="flex items-center justify-between cursor-pointer rounded-xl px-3 py-3 hover:bg-[#F5F8F7] transition"
-              >
-                <span className="text-gray-700 font-medium">
+              <option value="all">الكل</option>
+              {categories.map((category: any) => (
+                <option key={category.id} value={category.id.toString()}>
                   {category.name}
-                </span>
-
-                <input
-                  type="radio"
-                  name="category"
-                  id={category.id.toString()}
-                  value={category.id.toString()}
-                  checked={selectedCategory === category.id.toString()}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="accent-[#00342B] w-4 h-4"
-                />
-              </label>
-            ))}
-
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Divider */}

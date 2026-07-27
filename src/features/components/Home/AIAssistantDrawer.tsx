@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Send, Sparkles, User, Bot } from 'lucide-react'
 import { sendChatMessage } from '../../../api/axios'

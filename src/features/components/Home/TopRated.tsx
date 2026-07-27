@@ -1,8 +1,8 @@
-import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FaStar } from 'react-icons/fa'
 import { ArrowRight } from 'lucide-react'
 import type { Product } from '../../../data/products'
+import { getPrimaryImage } from '../../../lib/productMedia'
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function TopRated({ products }: { products: Product[] }) {
@@ -10,7 +10,7 @@ export default function TopRated({ products }: { products: Product[] }) {
   const normalizedProducts = products.map((item: any) => ({
     ...item,
     title: item.name || item.title || '',
-    imageCover: item.imageUrl || item.imageCover || '',
+    imageCover: getPrimaryImage(item) || item.imageCover || '',
     rating: item.rating || (4.0 + (item.id % 5) * 0.2),
   }))
 

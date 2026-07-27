@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -13,7 +13,6 @@ import {
   Globe,
   HelpCircle,
   Phone,
-  Percent,
   GitCompare,
   ChevronRight,
   LogOut,
@@ -25,7 +24,6 @@ import {
   Minus,
   ArrowRight,
   Truck,
-  ShieldCheck,
   Tag
 } from 'lucide-react'
 
@@ -652,6 +650,7 @@ export default function Navbar() {
               {[
                 { label: 'Home', to: '/' },
                 { label: 'Categories', to: '/category' },
+                { label: 'Dashboard', to: '/dashboard' },
                 { label: 'Cart', to: '/cart' },
                 { label: 'Deals', to: '/deals' },
                 { label: 'New Arrivals', to: '/new-arrivals' },

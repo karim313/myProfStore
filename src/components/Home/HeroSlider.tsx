@@ -16,10 +16,10 @@
  * - RTL Layout
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, ArrowLeft, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react'
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import SmartMatchDrawer from '../../features/smart-match/components/SmartMatchDrawer'
 import SmartMatchButton from '../../features/smart-match/components/SmartMatchButton'
 
@@ -65,7 +65,7 @@ const slides = [
 ]
 
 // ─── Animation Variants ───────────────────────────────────────────────────────
-const imageVariants = {
+const imageVariants: Variants = {
   enter: { opacity: 0, scale: 1.06, x: -40 },
   center: {
     opacity: 1, scale: 1, x: 0,
@@ -77,13 +77,13 @@ const imageVariants = {
   },
 }
 
-const textContainerVariants = {
+const textContainerVariants: Variants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
   exit: { transition: { staggerChildren: 0.05, staggerDirection: -1 } },
 }
 
-const textItemVariants = {
+const textItemVariants: Variants = {
   hidden: { opacity: 0, y: 28 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] } },
   exit: { opacity: 0, y: -16, transition: { duration: 0.35 } },
@@ -93,7 +93,6 @@ const textItemVariants = {
 export default function HeroSlider() {
   const navigate = useNavigate()
   const [current, setCurrent] = useState(0)
-  const [direction, setDirection] = useState(1) // 1 = forward, -1 = backward
   const [isPaused, setIsPaused] = useState(false)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -104,17 +103,14 @@ export default function HeroSlider() {
 
   // ── Navigation helpers ──────────────────────────────────────────────────────
   const goTo = useCallback((index: number) => {
-    setDirection(index > current ? 1 : -1)
     setCurrent(index)
-  }, [current])
+  }, [])
 
   const goNext = useCallback(() => {
-    setDirection(1)
     setCurrent(prev => (prev + 1) % total)
   }, [total])
 
   const goPrev = useCallback(() => {
-    setDirection(-1)
     setCurrent(prev => (prev - 1 + total) % total)
   }, [total])
 

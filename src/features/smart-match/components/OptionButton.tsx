@@ -1,4 +1,3 @@
-import React from 'react';
 
 export default function OptionButton({ label, onClick }: { label: string; onClick: () => void }) {
   return (

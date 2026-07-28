@@ -11,7 +11,7 @@ import QuestionForm from './components/QuestionForm';
 import QuestionTable from './components/QuestionTable';
 import ProductDescriptionBuilder from './components/ProductDescriptionBuilder';
 import { getCategories, createCategory, updateCategory as apiUpdateCategory, deleteCategory as apiDeleteCategory } from '../../api/axios';
-import { getProducts, createProduct, updateProduct as apiUpdateProduct, deleteProduct as apiDeleteProduct, getProductById, uploadProductImage, uploadProductImageUrl, deleteProductImage, setProductImageAsMain, addProductVideo, setProductVideoAsMain, deleteProductVideo } from '../../api/axios';
+import { getProducts, createProduct, updateProduct as apiUpdateProduct, deleteProduct as apiDeleteProduct, getProductById, uploadProductImage, uploadProductImageUrl, deleteProductImage, setProductImageAsMain, addProductVideo, setProductVideoAsMain, deleteProductVideo, createOffer } from '../../api/axios';
 import { getUsers, updateUser as apiUpdateUser, deleteUser as apiDeleteUser } from '../../api/axios';
 import { getPrimaryImage, type ProductMedia } from '../../lib/productMedia';
 import { getOrders, updateOrderStatus, cancelOrder } from '../../api/axios';
@@ -109,6 +109,11 @@ const Dashboard = () => {
   const [pendingAdditionalImageFiles, setPendingAdditionalImageFiles] = useState<File[]>([]);
   const [pendingMainVideoFile, setPendingMainVideoFile] = useState<File | null>(null);
   const [pendingAdditionalVideoFiles, setPendingAdditionalVideoFiles] = useState<File[]>([]);
+
+  // Offer modal state
+  const [offerModal, setOfferModal] = useState<{ productId: number; productName: string } | null>(null);
+  const [offerForm, setOfferForm] = useState({ discountPercentage: '', startDate: '', endDate: '' });
+  const [offerLoading, setOfferLoading] = useState(false);
 
   const clearPendingMedia = () => {
     setPendingMainImageFile(null);
@@ -218,7 +223,22 @@ const Dashboard = () => {
         ? await apiUpdateProduct(editingProduct.id, productDetails)
         : await createProduct(productDetails);
 
-      const productId = savedProduct?.id ?? savedProduct?.data?.id ?? editingProduct?.id;
+      // Try every possible response shape to extract the product id
+      let productId: number | undefined =
+        savedProduct?.id ??
+        savedProduct?.data?.id ??
+        savedProduct?.product?.id ??
+        editingProduct?.id;
+
+      // Last resort for new products: re-fetch product list and match by name
+      if (!editingProduct && !productId) {
+        try {
+          const res = await getProducts();
+          const all = normalizeArray<any>(res?.data ?? res);
+          const match = all.find((p: any) => p.name === productForm.name.trim());
+          productId = match?.id;
+        } catch (_) { /* ignore */ }
+      }
 
       if (!editingProduct && productId) {
         console.log('Uploading pending media for product', productId);
@@ -251,13 +271,11 @@ const Dashboard = () => {
         // Upload pending main image file
         if (pendingMainImageFile) {
           try {
-            const formData = new FormData();
-            formData.append('file', pendingMainImageFile);
-            const result = await uploadProductImage(productId, formData);
+            const result = await uploadProductImage(productId, pendingMainImageFile);
             console.log('Main image upload result:', result);
-            const imgId = result.id || result.imageId;
+            const imgId = result?.id ?? result?.imageId ?? result?.data?.id;
             if (imgId) {
-              await setProductImageAsMain(imgId);
+              await setProductImageAsMain(String(imgId));
             }
           } catch (error) {
             console.error('Failed to upload main image file:', error);
@@ -267,9 +285,7 @@ const Dashboard = () => {
         // Upload pending additional image files
         for (const file of pendingAdditionalImageFiles) {
           try {
-            const formData = new FormData();
-            formData.append('file', file);
-            const result = await uploadProductImage(productId, formData);
+            const result = await uploadProductImage(productId, file);
             console.log('Additional image upload result:', result);
           } catch (error) {
             console.error('Failed to upload additional image file:', error);
@@ -279,13 +295,11 @@ const Dashboard = () => {
         // Upload pending main video
         if (pendingMainVideoFile) {
           try {
-            const formData = new FormData();
-            formData.append('file', pendingMainVideoFile);
-            const result = await addProductVideo(productId, formData);
+            const result = await addProductVideo(productId, pendingMainVideoFile);
             console.log('Main video upload result:', result);
-            const vidId = result.id || result.videoId;
+            const vidId = result?.id ?? result?.videoId ?? result?.data?.id;
             if (vidId) {
-              await setProductVideoAsMain(vidId);
+              await setProductVideoAsMain(String(vidId));
             }
           } catch (error) {
             console.error('Failed to upload main video:', error);
@@ -295,9 +309,7 @@ const Dashboard = () => {
         // Upload pending additional videos
         for (const file of pendingAdditionalVideoFiles) {
           try {
-            const formData = new FormData();
-            formData.append('file', file);
-            const result = await addProductVideo(productId, formData);
+            const result = await addProductVideo(productId, file);
             console.log('Additional video upload result:', result);
           } catch (error) {
             console.error('Failed to upload additional video:', error);
@@ -305,9 +317,47 @@ const Dashboard = () => {
         }
       }
 
+      // Also upload pending video files when editing (files picked before saving)
+      if (editingProduct && productId) {
+        if (pendingMainVideoFile) {
+          try {
+            const result = await addProductVideo(productId, pendingMainVideoFile);
+            console.log('Edit — main video upload result:', result);
+            const vidId = result?.id ?? result?.videoId ?? result?.data?.id;
+            if (vidId) {
+              await setProductVideoAsMain(String(vidId));
+            }
+          } catch (error) {
+            console.error('Failed to upload main video (edit):', error);
+          }
+        }
+
+        for (const file of pendingAdditionalVideoFiles) {
+          try {
+            const result = await addProductVideo(productId, file);
+            console.log('Edit — additional video upload result:', result);
+          } catch (error) {
+            console.error('Failed to upload additional video (edit):', error);
+          }
+        }
+      }
+
       if (discountPercentage > 0 && productId) {
-        // Note: createOffer endpoint not available in current API spec
-        console.log('Offer creation skipped - endpoint not available');
+        try {
+          const startDate = productForm.offerStartDate
+            ? new Date(productForm.offerStartDate).toISOString()
+            : new Date().toISOString();
+          const endDate = productForm.offerEndDate
+            ? new Date(productForm.offerEndDate).toISOString()
+            : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+          await createOffer({ productId, discountPercentage, startDate, endDate });
+          alert(`✅ Offer of ${discountPercentage}% applied successfully!`);
+        } catch (error: any) {
+          const msg = error?.response?.data?.message ?? error?.message ?? 'Unknown error';
+          alert(`❌ Failed to create offer: ${msg}`);
+        }
+      } else if (discountPercentage > 0 && !productId) {
+        alert('⚠️ Product was saved but offer could not be applied: product ID was not returned by the server. Please use the 🏷️ Offer button in the product table to apply the offer manually.');
       }
 
       setProductForm(emptyProductForm);
@@ -368,14 +418,13 @@ const Dashboard = () => {
       setPendingMainImageFile(file);
       return URL.createObjectURL(file);
     }
-    const formData = new FormData();
-    formData.append('file', file);
-    const result = await uploadProductImage(editingProduct.id, formData);
-    const imgId = result.id || result.imageId;
+    // Pass File directly — uploadProductImage now builds FormData with correct 'Images' field
+    const result = await uploadProductImage(editingProduct.id, file);
+    const imgId = result?.id ?? result?.imageId ?? result?.data?.id;
     if (imgId) {
-      await setProductImageAsMain(imgId);
+      await setProductImageAsMain(String(imgId));
     }
-    return result.url || result.imageUrl || '';
+    return result?.url ?? result?.imageUrl ?? result?.data?.url ?? '';
   };
 
   const handleUploadAdditionalImages = async (files: File[]): Promise<string[]> => {
@@ -383,13 +432,9 @@ const Dashboard = () => {
       setPendingAdditionalImageFiles((prev) => [...prev, ...files]);
       return files.map(f => URL.createObjectURL(f));
     }
-    const uploadPromises = files.map(file => {
-      const formData = new FormData();
-      formData.append('file', file);
-      return uploadProductImage(editingProduct.id, formData);
-    });
-    const results = await Promise.all(uploadPromises);
-    return results.map(r => r.url || r.imageUrl || '');
+    // Pass File directly — uploadProductImage now builds FormData with correct 'Images' field
+    const results = await Promise.all(files.map(file => uploadProductImage(editingProduct.id, file)));
+    return results.map(r => r?.url ?? r?.imageUrl ?? r?.data?.url ?? '');
   };
 
   const handleUploadMainVideo = async (file: File): Promise<string> => {
@@ -397,14 +442,14 @@ const Dashboard = () => {
       setPendingMainVideoFile(file);
       return URL.createObjectURL(file);
     }
-    const formData = new FormData();
-    formData.append('file', file);
-    const result = await addProductVideo(editingProduct.id, formData);
-    const vidId = result.id || result.videoId;
+    // Pass File directly — addProductVideo will use the correct "video" field name
+    const result = await addProductVideo(editingProduct.id, file);
+    // Try all possible response shapes the API might return
+    const vidId = result?.id ?? result?.videoId ?? result?.data?.id;
     if (vidId) {
-      await setProductVideoAsMain(vidId);
+      await setProductVideoAsMain(String(vidId));
     }
-    return result.url || result.videoUrl || '';
+    return result?.url ?? result?.videoUrl ?? result?.data?.url ?? result?.data?.videoUrl ?? '';
   };
 
   const handleUploadAdditionalVideos = async (files: File[]): Promise<string[]> => {
@@ -412,13 +457,9 @@ const Dashboard = () => {
       setPendingAdditionalVideoFiles((prev) => [...prev, ...files]);
       return files.map(f => URL.createObjectURL(f));
     }
-    const uploadPromises = files.map(file => {
-      const formData = new FormData();
-      formData.append('file', file);
-      return addProductVideo(editingProduct.id, formData);
-    });
-    const results = await Promise.all(uploadPromises);
-    return results.map(r => r.url || r.videoUrl || '');
+    // Pass File directly — addProductVideo will use the correct "video" field name
+    const results = await Promise.all(files.map(file => addProductVideo(editingProduct.id, file)));
+    return results.map(r => r?.url ?? r?.videoUrl ?? r?.data?.url ?? r?.data?.videoUrl ?? '');
   };
 
   const handleDeleteImage = async (imageId: string): Promise<void> => {
@@ -444,6 +485,42 @@ const Dashboard = () => {
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (error) {
       console.error('Failed to delete product:', error);
+    }
+  };
+
+  // Standalone offer handler — used by the 🏷️ button in ProductTable
+  const handleOpenOfferModal = (product: Product) => {
+    setOfferModal({ productId: product.id, productName: product.name });
+    setOfferForm({ discountPercentage: '', startDate: '', endDate: '' });
+  };
+
+  const handleSubmitOffer = async () => {
+    if (!offerModal) return;
+    const discountPercentage = Number(offerForm.discountPercentage);
+    if (!discountPercentage || discountPercentage < 1 || discountPercentage > 100) {
+      alert('Please enter a discount between 1 and 100.');
+      return;
+    }
+    if (!offerForm.startDate || !offerForm.endDate) {
+      alert('Please select both start and end dates.');
+      return;
+    }
+    setOfferLoading(true);
+    try {
+      await createOffer({
+        productId: offerModal.productId,
+        discountPercentage,
+        startDate: new Date(offerForm.startDate).toISOString(),
+        endDate: new Date(offerForm.endDate).toISOString(),
+      });
+      alert(`✅ Offer of ${discountPercentage}% applied to "${offerModal.productName}" successfully!`);
+      setOfferModal(null);
+      await fetchData();
+    } catch (error: any) {
+      const msg = error?.response?.data?.message ?? error?.message ?? 'Unknown error';
+      alert(`❌ Failed to apply offer: ${msg}`);
+    } finally {
+      setOfferLoading(false);
     }
   };
 
@@ -719,6 +796,7 @@ const Dashboard = () => {
                 getCategoryName={getCategoryName}
                 onEdit={handleEditProduct}
                 onDelete={handleDeleteProduct}
+                onOffer={handleOpenOfferModal}
               />
             </div>
           )}
@@ -955,6 +1033,81 @@ const Dashboard = () => {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Offer Modal */}
+          {offerModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-xl font-bold text-gray-800">Add Offer</h3>
+                  <button
+                    onClick={() => setOfferModal(null)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  >
+                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Product</label>
+                    <input
+                      type="text"
+                      value={offerModal.productName}
+                      disabled
+                      className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-xl text-gray-600 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Discount Percentage (%)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="100"
+                      value={offerForm.discountPercentage}
+                      onChange={(e) => setOfferForm({ ...offerForm, discountPercentage: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00342B] focus:border-transparent transition-all text-sm"
+                      placeholder="Enter discount (1-100)"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                    <input
+                      type="datetime-local"
+                      value={offerForm.startDate}
+                      onChange={(e) => setOfferForm({ ...offerForm, startDate: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00342B] focus:border-transparent transition-all text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                    <input
+                      type="datetime-local"
+                      value={offerForm.endDate}
+                      onChange={(e) => setOfferForm({ ...offerForm, endDate: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00342B] focus:border-transparent transition-all text-sm"
+                    />
+                  </div>
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      onClick={handleSubmitOffer}
+                      disabled={offerLoading}
+                      className="flex-1 px-6 py-2.5 bg-[#00342B] text-white rounded-xl hover:bg-emerald-700 transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {offerLoading ? 'Creating...' : 'Create Offer'}
+                    </button>
+                    <button
+                      onClick={() => setOfferModal(null)}
+                      className="flex-1 px-6 py-2.5 bg-gray-200 text-gray-700 rounded-xl hover:bg-gray-300 transition-colors font-medium text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
             </>

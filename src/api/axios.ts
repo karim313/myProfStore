@@ -185,7 +185,7 @@ export async function deleteCategory(categoryId: number) {
 // Get all products
 export async function getProducts(): Promise<ProductsResponse> {
   try {
-    const res = await api.get('/api/Products');
+    const res = await api.get('/api/Products?page=1&pageSize=1000');
     return res.data;
   } catch (error) {
     console.error('Failed to fetch products:', error instanceof Error ? error.message : error);
@@ -248,14 +248,18 @@ export async function deleteProduct(productId: number) {
   }
 }
 
-// Upload image to a product
-export async function uploadProductImage(productId: number, formData: FormData) {
+// Upload image to a product — field name must be 'Images' (array), multipart/form-data
+export async function uploadProductImage(productId: number, fileOrFormData: File | FormData) {
   try {
-    const response = await api.post(`/api/Products/${productId}/images`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    let formData: FormData;
+    if (fileOrFormData instanceof FormData) {
+      formData = fileOrFormData;
+    } else {
+      formData = new FormData();
+      formData.append('Images', fileOrFormData);
+    }
+    // Do NOT set Content-Type manually — Axios will auto-include the multipart boundary
+    const response = await api.post(`/api/Products/${productId}/images`, formData);
     return response.data;
   } catch (error) {
     console.error('Failed to upload product image:', error);
@@ -277,11 +281,7 @@ export async function uploadProductImageUrl(productId: number, payload: { imageU
 // Update product images
 export async function updateProductImage(productId: number, formData: FormData) {
   try {
-    const response = await api.put(`/api/Products/${productId}/images`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const response = await api.put(`/api/Products/${productId}/images`, formData);
     return response.data;
   } catch (error) {
     console.error('Failed to update product image:', error);
@@ -311,14 +311,20 @@ export async function setProductImageAsMain(imageId: string) {
   }
 }
 
-// Add video to product
-export async function addProductVideo(productId: number, formData: FormData) {
+// Add video to product — field name must be 'Videos' (array), multipart/form-data
+export async function addProductVideo(productId: number, file: File): Promise<any>;
+export async function addProductVideo(productId: number, formData: FormData): Promise<any>;
+export async function addProductVideo(productId: number, fileOrFormData: File | FormData): Promise<any> {
   try {
-    const response = await api.post(`/api/Products/${productId}/videos`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    let formData: FormData;
+    if (fileOrFormData instanceof FormData) {
+      formData = fileOrFormData;
+    } else {
+      formData = new FormData();
+      formData.append('Videos', fileOrFormData);
+    }
+    // Do NOT set Content-Type manually — Axios will auto-include the multipart boundary
+    const response = await api.post(`/api/Products/${productId}/videos`, formData);
     return response.data;
   } catch (error) {
     console.error('Failed to add product video:', error);
@@ -401,13 +407,31 @@ export async function createOrder(data: {
   }
 }
 
-// Update Order Status
+// Update Order Status — status is a query param per the API spec
 export async function updateOrderStatus(orderId: number, data: { status: string }) {
   try {
-    const res = await api.put(`/api/Orders/${orderId}/status`, data);
+    const res = await api.put(`/api/Orders/${orderId}/status`, null, { params: { status: data.status } });
     return res.data;
   } catch (error) {
     console.error('Failed to update order status:', error instanceof Error ? error.message : error);
+    throw error;
+  }
+}
+
+// ==================== Offers ====================
+
+// Create Offer — POST /api/Offers
+export async function createOffer(data: {
+  productId: number;
+  discountPercentage: number;
+  startDate: string;
+  endDate: string;
+}) {
+  try {
+    const res = await api.post('/api/Offers', data);
+    return res.data;
+  } catch (error) {
+    console.error('Failed to create offer:', error instanceof Error ? error.message : error);
     throw error;
   }
 }

@@ -143,7 +143,7 @@ export default function SpecificProduct() {
         {relatedProducts.length > 0 && (
           <div className="mt-16">
             <h2 className="text-2xl font-bold text-[#00342B] mb-6">منتجات ذات صلة</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {relatedProducts.map((relatedProduct) => (
                 <a
                   key={relatedProduct.id}

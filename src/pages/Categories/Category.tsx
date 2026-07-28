@@ -99,7 +99,7 @@ export default function Category() {
             <ProductCardSkeleton/>
           </div>
         ) : (
-        <div className="displayProducts flex-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
+        <div className="displayProducts flex-1 grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           {
             filteredProducts.map((product, index) => {
               const review = getProductReview(product.id);

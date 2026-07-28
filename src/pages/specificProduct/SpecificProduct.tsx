@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getProductById } from '../../api/axios';
+import { getProductById, getProducts } from '../../api/axios';
 import { useReviewedProducts } from '@/Context/ReviewedProductsContext';
 import ProductMediaGallery from './ProductMediaGallery';
 import ProductReviewsDialog from '../../components/Dialog/ProductReviewsDialog';
+import { getPrimaryImage } from '../../lib/productMedia';
 
 export default function SpecificProduct() {
   const { id } = useParams();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [reviewsDialogOpen, setReviewsDialogOpen] = useState<boolean>(false);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
 
   const { reviewedProducts } = useReviewedProducts();
 
@@ -26,6 +28,14 @@ export default function SpecificProduct() {
       try {
         const res = await getProductById(Number(id));
         setProduct(res);
+
+        // Fetch related products from the same category
+        const allProductsRes = await getProducts();
+        const allProducts = allProductsRes?.products || [];
+        const related = allProducts
+          .filter((p: any) => p.category === res.category && p.id !== res.id)
+          .slice(0, 4);
+        setRelatedProducts(related);
       } catch (error) {
         console.error('Failed to fetch product details:', error);
       } finally {
@@ -128,6 +138,42 @@ export default function SpecificProduct() {
             </div>
           </div>
         </div>
+
+        {/* Related Products Section */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-2xl font-bold text-[#00342B] mb-6">منتجات ذات صلة</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedProducts.map((relatedProduct) => (
+                <a
+                  key={relatedProduct.id}
+                  href={`/product/${relatedProduct.id}`}
+                  className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 group"
+                >
+                  <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 mb-4">
+                    <img
+                      src={getPrimaryImage(relatedProduct)}
+                      alt={relatedProduct.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <h3 className="font-bold text-gray-800 text-sm mb-2 line-clamp-2">{relatedProduct.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold text-[#00342B]">${relatedProduct.finalPrice}</span>
+                    {relatedProduct.originalPrice && relatedProduct.originalPrice > relatedProduct.finalPrice && (
+                      <span className="text-sm text-gray-400 line-through">${relatedProduct.originalPrice}</span>
+                    )}
+                  </div>
+                  {relatedProduct.discountPercentage && relatedProduct.discountPercentage > 0 && (
+                    <span className="inline-block mt-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
+                      خصم {relatedProduct.discountPercentage}%
+                    </span>
+                  )}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Reviews Dialog */}

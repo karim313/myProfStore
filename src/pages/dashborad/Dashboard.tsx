@@ -11,7 +11,7 @@ import QuestionForm from './components/QuestionForm';
 import QuestionTable from './components/QuestionTable';
 import ProductDescriptionBuilder from './components/ProductDescriptionBuilder';
 import { getCategories, createCategory, updateCategory as apiUpdateCategory, deleteCategory as apiDeleteCategory } from '../../api/axios';
-import { getProducts, createProduct, updateProduct as apiUpdateProduct, deleteProduct as apiDeleteProduct, getProductById, uploadProductImage, uploadProductImageUrl, deleteProductImage, setProductImageAsMain, addProductVideo, setProductVideoAsMain, deleteProductVideo, createOffer } from '../../api/axios';
+import { getProducts, createProduct, updateProduct as apiUpdateProduct, deleteProduct as apiDeleteProduct, getProductById, uploadProductImage, uploadProductImageUrl, deleteProductImage, setProductImageAsMain, addProductVideo, uploadProductVideoUrl, setProductVideoAsMain, deleteProductVideo, createOffer } from '../../api/axios';
 import { getUsers, updateUser as apiUpdateUser, deleteUser as apiDeleteUser } from '../../api/axios';
 import { getPrimaryImage, type ProductMedia } from '../../lib/productMedia';
 import { getOrders, updateOrderStatus, cancelOrder } from '../../api/axios';
@@ -292,6 +292,30 @@ const Dashboard = () => {
           }
         }
 
+        // Upload main video URL if provided as text string
+        if (productForm.mainVideo && typeof productForm.mainVideo === 'string' && productForm.mainVideo.trim() && !pendingMainVideoFile) {
+          try {
+            await uploadProductVideoUrl(productId, { videoUrl: productForm.mainVideo.trim(), isMain: true });
+            console.log('Main video URL uploaded successfully');
+          } catch (error) {
+            console.error('Failed to upload main video URL:', error);
+          }
+        }
+
+        // Upload additional video URLs if provided as text strings
+        if (Array.isArray(productForm.videos)) {
+          for (const vidUrl of productForm.videos) {
+            if (vidUrl && typeof vidUrl === 'string' && vidUrl.trim() && vidUrl !== productForm.mainVideo) {
+              try {
+                await uploadProductVideoUrl(productId, { videoUrl: vidUrl.trim(), isMain: false });
+                console.log('Additional video URL uploaded successfully');
+              } catch (error) {
+                console.error('Failed to upload additional video URL:', error);
+              }
+            }
+          }
+        }
+
         // Upload pending main video
         if (pendingMainVideoFile) {
           try {
@@ -319,6 +343,30 @@ const Dashboard = () => {
 
       // Also upload pending video files when editing (files picked before saving)
       if (editingProduct && productId) {
+        // Upload main video URL if provided as text string
+        if (productForm.mainVideo && typeof productForm.mainVideo === 'string' && productForm.mainVideo.trim() && !pendingMainVideoFile) {
+          try {
+            await uploadProductVideoUrl(productId, { videoUrl: productForm.mainVideo.trim(), isMain: true });
+            console.log('Edit — main video URL uploaded successfully');
+          } catch (error) {
+            console.error('Failed to upload main video URL (edit):', error);
+          }
+        }
+
+        // Upload additional video URLs if provided as text strings
+        if (Array.isArray(productForm.videos)) {
+          for (const vidUrl of productForm.videos) {
+            if (vidUrl && typeof vidUrl === 'string' && vidUrl.trim() && vidUrl !== productForm.mainVideo) {
+              try {
+                await uploadProductVideoUrl(productId, { videoUrl: vidUrl.trim(), isMain: false });
+                console.log('Edit — additional video URL uploaded successfully');
+              } catch (error) {
+                console.error('Failed to upload additional video URL (edit):', error);
+              }
+            }
+          }
+        }
+
         if (pendingMainVideoFile) {
           try {
             const result = await addProductVideo(productId, pendingMainVideoFile);

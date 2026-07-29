@@ -2,6 +2,29 @@ import { useState, useEffect } from 'react';
 import { buildProductMediaList, type ProductMedia, type MediaGalleryItem } from '../../lib/productMedia';
 import { Play, Maximize2, X, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
 
+// Helper function to convert YouTube URLs to embed format
+const getYouTubeEmbedUrl = (url: string): string | null => {
+  if (!url) return null;
+
+  // Match YouTube regular URLs, Shorts, and embed URLs
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return `https://www.youtube-nocookie.com/embed/${match[1]}?autoplay=1&mute=0&controls=0&loop=1&playlist=${match[1]}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0&cc_load_policy=0&hl=en`;
+    }
+  }
+
+  return null;
+};
+
+const isYouTubeUrl = (url: string): boolean => {
+  return getYouTubeEmbedUrl(url) !== null;
+};
+
 interface ProductMediaGalleryProps {
   product?: Partial<ProductMedia> | null;
 }
@@ -29,6 +52,8 @@ export default function ProductMediaGallery({ product }: ProductMediaGalleryProp
   }, [product]);
 
   const activeMedia: MediaGalleryItem | undefined = mediaList[activeIndex];
+  const isYouTube = activeMedia?.type === 'video' && isYouTubeUrl(activeMedia.url);
+  const youtubeEmbedUrl = isYouTube ? getYouTubeEmbedUrl(activeMedia.url) : null;
 
   // Fullscreen keyboard navigation
   useEffect(() => {
@@ -64,13 +89,24 @@ export default function ProductMediaGallery({ product }: ProductMediaGalleryProp
       {/* ── Main Active Media View ── */}
       <div className="relative w-full h-80 md:h-[450px] bg-black/5 rounded-3xl overflow-hidden border border-gray-200 shadow-lg group flex items-center justify-center">
         {activeMedia?.type === 'video' ? (
-          <video
-            key={activeMedia.id}
-            src={activeMedia.url}
-            controls
-            autoPlay
-            className="w-full h-full object-contain bg-black"
-          />
+          isYouTube && youtubeEmbedUrl ? (
+            <iframe
+              key={activeMedia.id}
+              src={youtubeEmbedUrl}
+              title="YouTube video player"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full object-contain bg-black"
+            />
+          ) : (
+            <video
+              key={activeMedia.id}
+              src={activeMedia.url}
+              controls
+              autoPlay
+              className="w-full h-full object-contain bg-black"
+            />
+          )
         ) : (
           <img
             key={activeMedia?.id}
@@ -184,12 +220,22 @@ export default function ProductMediaGallery({ product }: ProductMediaGalleryProp
             {/* Content */}
             <div className="max-w-5xl max-h-full flex items-center justify-center p-2">
               {activeMedia?.type === 'video' ? (
-                <video
-                  src={activeMedia.url}
-                  controls
-                  autoPlay
-                  className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl"
-                />
+                isYouTube && youtubeEmbedUrl ? (
+                  <iframe
+                    src={youtubeEmbedUrl}
+                    title="YouTube video player"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl"
+                  />
+                ) : (
+                  <video
+                    src={activeMedia.url}
+                    controls
+                    autoPlay
+                    className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl"
+                  />
+                )
               ) : (
                 <img
                   src={activeMedia?.url}

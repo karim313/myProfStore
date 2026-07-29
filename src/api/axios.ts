@@ -369,6 +369,17 @@ export async function deleteProductVideo(videoId: string) {
   }
 }
 
+// Upload video URL to a product (/api/Products/{id}/videos/url)
+export async function uploadProductVideoUrl(productId: number, payload: { videoUrl: string; isMain: boolean }) {
+  try {
+    const response = await api.post(`/api/Products/${productId}/videos/url`, payload);
+    return response.data;
+  } catch (error) {
+    console.error('Failed to upload product video url:', error);
+    throw error;
+  }
+}
+
 // ==================== Orders ====================
 
 // Get All Orders

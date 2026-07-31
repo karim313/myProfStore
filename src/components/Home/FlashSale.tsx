@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FiZap } from 'react-icons/fi'
+import { FiZap, FiShoppingCart, FiCheck, FiLoader } from 'react-icons/fi'
 import { ArrowRight } from 'lucide-react'
 import { getPrimaryImage } from '../../lib/productMedia'
+import { useCart } from '../../features/hooks/useCart'
 
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function FlashSale({highestDiscountProducts}: {highestDiscountProducts: any[]}) {
   const navigate = useNavigate()
+  const { handleAddToCart, loadingId, addedId } = useCart()
   const [countdowns, setCountdowns] = useState<Record<number, { h: number; m: number; s: number }>>({})
 
   useEffect(() => {
@@ -97,6 +99,18 @@ export default function FlashSale({highestDiscountProducts}: {highestDiscountPro
                         ${pro.originalPrice.toLocaleString()}
                       </span>
                     </div>
+                    <button
+                      onClick={(e) => handleAddToCart(pro.id, e)}
+                      disabled={loadingId === pro.id}
+                      aria-label='add to cart'
+                      className={'flex items-center justify-center w-9 h-9 rounded-full transition-all duration-200 shadow-sm cursor-pointer ' + (addedId === pro.id ? 'bg-emerald-500 text-white scale-110' : 'bg-[#00342B] text-white hover:bg-emerald-600 hover:scale-105') + (loadingId === pro.id ? ' opacity-70 cursor-not-allowed' : '')}
+                    >
+                      {loadingId === pro.id
+                        ? <FiLoader size={15} className='animate-spin' />
+                        : addedId === pro.id
+                        ? <FiCheck size={15} />
+                        : <FiShoppingCart size={15} />}
+                    </button>
                   </div>
                   {/* Individual Countdown */}
                   {pro.offerEndDate && countdowns[pro.id] && (

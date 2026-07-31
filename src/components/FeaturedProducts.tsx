@@ -1,6 +1,7 @@
 import type { Product } from '../data/products'
-
+import { FiShoppingCart, FiCheck, FiLoader } from 'react-icons/fi'
 import { getPrimaryImage } from '../lib/productMedia'
+import { useCart } from '../features/hooks/useCart'
 
 // ── Badge ──────────────────────────────────────────────────────────────────
 interface BadgeProps {
@@ -25,18 +26,29 @@ interface ProductCardProps {
   product: Product
   onSelect?: (p: Product) => void
   size?: CardSize
+  onAddToCart?: (id: number, e: React.MouseEvent) => void
+  loadingId?: number | null
+  addedId?: number | null
 }
-function ProductCard({ product, onSelect, size = 'small' }: ProductCardProps) {
+
+function ProductCard({ product, onSelect, size = 'small', onAddToCart, loadingId, addedId }: ProductCardProps) {
   const isLarge = size === 'large' || size === 'tall'
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect?.(product);
+        }
+      }}
       onClick={() => onSelect?.(product)}
       aria-label={`${product.name} — ${product.finalPrice.toLocaleString()} د.ع`}
       className="relative rounded-2xl overflow-hidden group w-full h-full text-right
                  focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400
-                 focus-visible:ring-offset-2 focus-visible:ring-offset-[#00342B]"
+                 focus-visible:ring-offset-2 focus-visible:ring-offset-[#00342B] cursor-pointer"
     >
       <img
         src={getPrimaryImage(product)}
@@ -48,6 +60,25 @@ function ProductCard({ product, onSelect, size = 'small' }: ProductCardProps) {
       <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
 
       <Badge>{product.offerEndDate ?? undefined}</Badge>
+
+      {/* Add to Cart button — revealed on hover */}
+      {onAddToCart && (
+        <div className="absolute top-3 left-3 lg:top-4 lg:left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onAddToCart(product.id, e); }}
+            disabled={loadingId === product.id}
+            aria-label="أضف إلى السلة"
+            className={'flex items-center justify-center w-9 h-9 rounded-full shadow-lg transition-all duration-200 ' + (addedId === product.id ? 'bg-emerald-500 text-white scale-110' : 'bg-white/90 text-[#00342B] hover:bg-emerald-500 hover:text-white hover:scale-105') + (loadingId === product.id ? ' opacity-70 cursor-not-allowed' : ' cursor-pointer')}
+          >
+            {loadingId === product.id
+              ? <FiLoader size={15} className="animate-spin" />
+              : addedId === product.id
+              ? <FiCheck size={15} />
+              : <FiShoppingCart size={15} />}
+          </button>
+        </div>
+      )}
 
       <div className={`absolute bottom-3 right-3 lg:bottom-5 lg:right-5 text-right ${isLarge ? 'lg:bottom-6' : ''}`}>
         <p className={`text-gray-300 ${isLarge ? 'text-sm' : 'text-xs'}`}>{product.category}</p>
@@ -83,7 +114,7 @@ function ProductCard({ product, onSelect, size = 'small' }: ProductCardProps) {
           </span>
         )}
       </div>
-    </button>
+    </div>
   )
 }
 
@@ -95,17 +126,12 @@ interface FeaturedProductsProps {
 }
 
 export default function FeaturedProducts({
-  
-  
-
-
-
-
   featuredProducts = [],
   onViewAll,
   onSelectProduct,
 }: FeaturedProductsProps) {
   if (!featuredProducts.length) return null
+  const { handleAddToCart, loadingId, addedId } = useCart()
 
   const [hero, second, third, tall] = featuredProducts
   const smallCards = [second, third].filter(Boolean) as Product[]
@@ -140,14 +166,14 @@ export default function FeaturedProducts({
           <div className="flex flex-col gap-4">
             {hero && (
               <div className="h-[280px] lg:h-[380px] w-full">
-                <ProductCard product={hero} onSelect={onSelectProduct} size="large" />
+                <ProductCard product={hero} onSelect={onSelectProduct} size="large" onAddToCart={handleAddToCart} loadingId={loadingId} addedId={addedId} />
               </div>
             )}
             {smallCards.length > 0 && (
               <div className={`grid gap-4 ${smallCards.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
                 {smallCards.map((p) => (
                   <div key={p.id} className="h-[200px] lg:h-[220px] w-full">
-                    <ProductCard product={p} onSelect={onSelectProduct} size="small" />
+                    <ProductCard product={p} onSelect={onSelectProduct} size="small" onAddToCart={handleAddToCart} loadingId={loadingId} addedId={addedId} />
                   </div>
                 ))}
               </div>
@@ -157,7 +183,7 @@ export default function FeaturedProducts({
           {/* Right Tall Card */}
           {tall && (
             <div className="h-[380px] lg:h-full min-h-[616px] w-full">
-              <ProductCard product={tall} onSelect={onSelectProduct} size="tall" />
+              <ProductCard product={tall} onSelect={onSelectProduct} size="tall" onAddToCart={handleAddToCart} loadingId={loadingId} addedId={addedId} />
             </div>
           )}
 

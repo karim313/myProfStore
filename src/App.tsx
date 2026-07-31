@@ -10,6 +10,7 @@ import {Login} from './pages/Auth/login/Login';
 import { Register } from './pages/Auth/register/Register';
 import FullScreenLoader from './components/Loader/FullScreenLoader';
 import SpecificProduct from './pages/specificProduct/SpecificProduct';
+import Wishlist from './pages/Wishlist/Wishlist';
 
 const router = createBrowserRouter([
     {path: '/', element: <Layout />, children: [
@@ -32,6 +33,10 @@ const router = createBrowserRouter([
     {
       path:"/cart",
       element:<Cart></Cart>
+    },
+    {
+      path:"/wishlist",
+      element:<Wishlist></Wishlist>
     }
     ]},
     {path:'/login',element:<Login/>},

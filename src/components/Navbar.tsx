@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { getCart, getWishlist } from '../api/axios'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
@@ -88,6 +89,8 @@ interface CartItem {
 }
 
 export default function Navbar() {
+  const navigate = useNavigate();
+
   // Navigation states
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchFocused, setSearchFocused] = useState(false)
@@ -107,7 +110,8 @@ export default function Navbar() {
 
   // Cart & Wishlist Drawer
   const [cartOpen, setCartOpen] = useState(false)
-  const [wishlistCount, setWishlistCount] = useState(3)
+  const [wishlistCount, setWishlistCount] = useState(0)
+  const [cartCount, setCartCount] = useState(0)
 
   // Mock Cart Items
   const [cartItems, setCartItems] = useState<CartItem[]>([
@@ -146,6 +150,39 @@ export default function Navbar() {
     }, 5000)
     return () => clearInterval(timer)
   }, [])
+
+  // Fetch cart and wishlist counts
+  useEffect(() => {
+    const fetchCounts = async () => {
+      try {
+        const [cartRes, wishlistRes] = await Promise.all([
+          getCart(),
+          getWishlist()
+        ]);
+        
+        if (cartRes && cartRes.items) {
+          setCartCount(cartRes.items.length);
+        }
+        
+        if (wishlistRes) {
+          setWishlistCount(wishlistRes.length);
+        }
+      } catch (error) {
+        console.error('Failed to fetch navbar counts', error);
+      }
+    };
+    
+    fetchCounts();
+
+    // Listen for custom events dispatched from API methods
+    window.addEventListener('cartUpdated', fetchCounts);
+    window.addEventListener('wishlistUpdated', fetchCounts);
+
+    return () => {
+      window.removeEventListener('cartUpdated', fetchCounts);
+      window.removeEventListener('wishlistUpdated', fetchCounts);
+    };
+  }, []);
 
   // Close modals on click outside
   useEffect(() => {
@@ -203,7 +240,7 @@ export default function Navbar() {
   }
 
   const cartTotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
-  const totalItemCount = cartItems.reduce((acc, item) => acc + item.quantity, 0)
+  const totalItemCount = cartCount // Using fetched cart items length
 
   return (
     <header className="w-full fixed top-0 left-0 z-50 bg-white border-b border-gray-100 shadow-xs">
@@ -488,7 +525,7 @@ export default function Navbar() {
 
             {/* Wishlist */}
             <button
-              onClick={() => setWishlistCount(prev => Math.max(0, prev - 1))}
+              onClick={() => navigate('/wishlist')}
               className="flex items-center justify-center p-2 text-slate-700 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer relative group"
               aria-label="Wishlist"
             >

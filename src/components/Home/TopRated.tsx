@@ -1,15 +1,37 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { FaStar } from 'react-icons/fa'
+import { FiShoppingCart, FiCheck, FiLoader } from 'react-icons/fi'
 import { ArrowRight } from 'lucide-react'
 import { useReviewedProducts } from '../../Context/ReviewedProductsContext'
 import { getPrimaryImage } from '../../lib/productMedia'
+import type { Product } from '@/interface'
+import { useState } from 'react'
+import { handleAddToCart } from '@/helper/addToCart'
+import { flyToCart } from '@/helper/flyToCart'
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function TopRated() {
   const { reviewedProducts, loading } = useReviewedProducts();
   const navigate = useNavigate();
+  const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [addedId, setAddedId] = useState<number | null>(null);
 
   const topProducts = reviewedProducts.slice(0, 4);
+
+  async function addProToCart(e: React.MouseEvent, pro: Product) {
+    e.stopPropagation();
+    setLoadingId(pro.id);
+    try {
+      await handleAddToCart({ productId: pro.id, quantity: 1 });
+      setAddedId(pro.id);
+      flyToCart(e, getPrimaryImage(pro));
+      setTimeout(() => setAddedId(null), 2000);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    } finally {
+      setLoadingId(null);
+    }
+  }
 
   return (
     <section
@@ -45,6 +67,9 @@ export default function TopRated() {
                   src={getPrimaryImage(pro)}
                   alt={pro.name}
                   className='w-full h-full object-cover'
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300?text=No+Image';
+                  }}
                 />
               </picture>
 
@@ -58,9 +83,23 @@ export default function TopRated() {
                   <span className='font-bold text-[#00342B] text-sm'>
                     {pro.finalPrice?.toLocaleString() ?? pro.originalPrice?.toLocaleString() ?? 0} د.ع
                   </span>
-                  <div className='flex items-center gap-1'>
-                    <span className='text-gray-500 text-xs'>{(pro.averageRating ?? 0).toFixed(1)}</span>
-                    <FaStar className='text-yellow-400 text-xs' />
+                  <div className='flex items-center gap-2'>
+                    <div className='flex items-center gap-1'>
+                      <span className='text-gray-500 text-xs'>{(pro.averageRating ?? 0).toFixed(1)}</span>
+                      <FaStar className='text-yellow-400 text-xs' />
+                    </div>
+                    <button
+                      onClick={(e) => addProToCart(e, pro)}
+                      disabled={loadingId === pro.id}
+                      aria-label='add to cart'
+                      className={'flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 shadow-sm cursor-pointer ' + (addedId === pro.id ? 'bg-emerald-500 text-white scale-110' : 'bg-[#00342B] text-white hover:bg-emerald-600 hover:scale-105') + (loadingId === pro.id ? ' opacity-70 cursor-not-allowed' : '')}
+                    >
+                      {loadingId === pro.id
+                        ? <FiLoader size={13} className='animate-spin' />
+                        : addedId === pro.id
+                        ? <FiCheck size={13} />
+                        : <FiShoppingCart size={13} />}
+                    </button>
                   </div>
                 </div>
               </div>

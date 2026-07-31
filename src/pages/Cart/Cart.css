@@ -90,6 +90,11 @@
   margin-bottom: 0.5rem;
   box-shadow: 0 12px 40px rgba(0,52,43,0.12);
 }
+.cart-empty__icon--auth {
+  background: linear-gradient(145deg, #dbeafe, #bfdbfe);
+  color: #1d4ed8;
+  box-shadow: 0 12px 40px rgba(29,78,216,0.12);
+}
 .cart-empty h2 {
   font-size: 1.75rem;
   font-weight: 800;
@@ -101,6 +106,12 @@
   color: #6b7280;
   line-height: 1.65;
   margin: 0;
+}
+.cart-auth-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* ── Main Grid ── */

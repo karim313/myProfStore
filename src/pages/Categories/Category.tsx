@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react'
-import { getCategories, getProducts } from '../../api/axios'
+import { getCategories, getProducts, addToWishlist, removeFromWishlist, getWishlist } from '../../api/axios'
 import { useReviewedProducts } from "../../Context/ReviewedProductsContext";
 import ProductReviewsDialog from "@/components/Dialog/ProductReviewsDialog";
 import { getPrimaryImage } from "@/lib/productMedia";
 import ProductCardSkeleton from '../../components/cardLoader/CardLoader';
 import { useNavigate } from 'react-router-dom';
+import { Heart } from 'lucide-react';
+import type { Product } from '@/interface';
+import { handleAddToCart } from '@/helper/addToCart';
 
 export default function Category() {
   const { reviewedProducts } = useReviewedProducts();
+  const navigate = useNavigate();
 
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -15,6 +19,9 @@ export default function Category() {
   const [sortType, setSortType] = useState("");
   const [open, setOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [wishlistItems, setWishlistItems] = useState<any[]>([]);
+  const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [addedId, setAddedId] = useState<number | null>(null);
 
   // getAllProducts
   const getAllProducts = async () => {
@@ -48,12 +55,53 @@ export default function Category() {
   useEffect(() => {
     getAllProducts();
     getAllCategories();
+    // Load wishlist from API
+    const fetchWishlist = async () => {
+      try {
+        const res = await getWishlist();
+        setWishlistItems(res || []);
+      } catch (error) {
+        console.error('Failed to fetch wishlist:', error);
+      }
+    };
+    fetchWishlist();
   }, []);
 
-  const navigate = useNavigate();
   const handleProductClick = (productId: number) => {
     navigate(`/product/${productId}`);
   };
+
+  const toggleWishlist = async (productId: number) => {
+    const isInWishlist = wishlistItems.some((item: any) => item.id === productId);
+
+    try {
+      if (isInWishlist) {
+        await removeFromWishlist(productId);
+        setWishlistItems(wishlistItems.filter((item: any) => item.id !== productId));
+      } else {
+        await addToWishlist(productId);
+        // Refresh wishlist after adding
+        const res = await getWishlist();
+        setWishlistItems(res || []);
+      }
+    } catch (error) {
+      console.error('Failed to toggle wishlist:', error);
+    }
+  };
+
+  async function addProToCart(product: any) {
+    setLoadingId(product.id);
+    try {
+      await handleAddToCart({ productId: product.id, quantity: 1 });
+      setAddedId(product.id);
+      setTimeout(() => setAddedId(null), 2000);
+      console.log(product.id);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    } finally {
+      setLoadingId(null);
+    }
+  }
 
   // ترجع الـ Review الخاص بالمنتج
   const getProductReview = (productId: number) => {
@@ -120,6 +168,21 @@ export default function Category() {
 
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
 
+                    {/* Wishlist Icon */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleWishlist(product.id);
+                      }}
+                      className="absolute top-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all duration-300 hover:scale-110 cursor-pointer"
+                      title="Add to Wishlist"
+                    >
+                      <Heart
+                        size={18}
+                        className={`transition-colors ${wishlistItems.some((item: any) => item.id === product.id) ? 'text-red-500 fill-red-500' : 'text-gray-600 hover:text-red-500'}`}
+                      />
+                    </button>
+
                   </div>
 
                   {/* Content */}
@@ -172,8 +235,12 @@ export default function Category() {
                       <span className="text-xl font-bold text-[#00342B]">
                         ${product.finalPrice}
                       </span>
-                      <button className="bg-[#00342B] cursor-pointer hover:bg-[#014237] text-white text-sm px-4 py-2 rounded-xl transition duration-300 whitespace-nowrap">
-                        Add to Cart
+                      <button
+                        onClick={() => addProToCart(product)}
+                        disabled={loadingId === product.id}
+                        className="bg-[#00342B] cursor-pointer hover:bg-[#014237] text-white text-sm px-4 py-2 rounded-xl transition duration-300 whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
+                      >
+                        {loadingId === product.id ? 'Adding...' : addedId === product.id ? 'Added!' : 'Add to Cart'}
                       </button>
                     </div>
                   </div>

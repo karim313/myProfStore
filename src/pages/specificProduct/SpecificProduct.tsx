@@ -1,17 +1,24 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getProductById, getProducts } from '../../api/axios';
+import { useParams, useNavigate } from 'react-router-dom';
+import { getProductById, getProducts, addToWishlist, removeFromWishlist, getWishlist } from '../../api/axios';
 import { useReviewedProducts } from '@/Context/ReviewedProductsContext';
 import ProductMediaGallery from './ProductMediaGallery';
 import ProductReviewsDialog from '../../components/Dialog/ProductReviewsDialog';
 import { getPrimaryImage } from '../../lib/productMedia';
+import { Heart } from 'lucide-react';
+import type { Product } from '@/interface';
+import { handleAddToCart } from '@/helper/addToCart';
 
 export default function SpecificProduct() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [reviewsDialogOpen, setReviewsDialogOpen] = useState<boolean>(false);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<any[]>([]);
+  const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [addedId, setAddedId] = useState<number | null>(null);
 
   const { reviewedProducts } = useReviewedProducts();
 
@@ -45,7 +52,50 @@ export default function SpecificProduct() {
     if (id) {
       fetchProduct();
     }
+
+    // Load wishlist from API
+    const fetchWishlist = async () => {
+      try {
+        const res = await getWishlist();
+        setWishlistItems(res || []);
+      } catch (error) {
+        console.error('Failed to fetch wishlist:', error);
+      }
+    };
+    fetchWishlist();
   }, [id]);
+
+  const toggleWishlist = async (productId: number) => {
+    const isInWishlist = wishlistItems.some((item: any) => item.id === productId);
+
+    try {
+      if (isInWishlist) {
+        await removeFromWishlist(productId);
+        setWishlistItems(wishlistItems.filter((item: any) => item.id !== productId));
+      } else {
+        await addToWishlist(productId);
+        // Refresh wishlist after adding
+        const res = await getWishlist();
+        setWishlistItems(res || []);
+      }
+    } catch (error) {
+      console.error('Failed to toggle wishlist:', error);
+    }
+  };
+
+  async function addProToCart(product: any) {
+    setLoadingId(product.id);
+    try {
+      await handleAddToCart({ productId: product.id, quantity: 1 });
+      setAddedId(product.id);
+      setTimeout(() => setAddedId(null), 2000);
+      console.log(product.id);
+    } catch (error) {
+      console.error('Failed to add to cart:', error);
+    } finally {
+      setLoadingId(null);
+    }
+  }
 
   if (loading) {
     return (
@@ -131,9 +181,11 @@ export default function SpecificProduct() {
             <div className="pt-2">
               <button
                 type="button"
-                className="w-full bg-[#00342B] hover:bg-[#014237] text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-emerald-950/30 cursor-pointer flex items-center justify-center gap-2 text-lg"
+                onClick={() => addProToCart(product)}
+                disabled={loadingId === product?.id}
+                className="w-full bg-[#00342B] hover:bg-[#014237] text-white font-bold py-4 px-6 rounded-2xl shadow-lg transition-all duration-300 hover:shadow-emerald-950/30 cursor-pointer flex items-center justify-center gap-2 text-lg disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                أضف إلى السلة
+                {loadingId === product?.id ? 'جاري الإضافة...' : addedId === product?.id ? 'تمت الإضافة!' : 'أضف إلى السلة'}
               </button>
             </div>
           </div>
@@ -145,31 +197,46 @@ export default function SpecificProduct() {
             <h2 className="text-2xl font-bold text-[#00342B] mb-6">منتجات ذات صلة</h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {relatedProducts.map((relatedProduct) => (
-                <a
+                <div
                   key={relatedProduct.id}
-                  href={`/product/${relatedProduct.id}`}
-                  className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 group"
+                  className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-lg transition-all duration-300 group relative"
                 >
-                  <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 mb-4">
-                    <img
-                      src={getPrimaryImage(relatedProduct)}
-                      alt={relatedProduct.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                  <h3 className="font-bold text-gray-800 text-sm mb-2 line-clamp-2">{relatedProduct.name}</h3>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold text-[#00342B]">${relatedProduct.finalPrice}</span>
-                    {relatedProduct.originalPrice && relatedProduct.originalPrice > relatedProduct.finalPrice && (
-                      <span className="text-sm text-gray-400 line-through">${relatedProduct.originalPrice}</span>
+                  <a href={`/product/${relatedProduct.id}`} className="block">
+                    <div className="aspect-square rounded-xl overflow-hidden bg-gray-100 mb-4">
+                      <img
+                        src={getPrimaryImage(relatedProduct)}
+                        alt={relatedProduct.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    </div>
+                    <h3 className="font-bold text-gray-800 text-sm mb-2 line-clamp-2">{relatedProduct.name}</h3>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold text-[#00342B]">${relatedProduct.finalPrice}</span>
+                      {relatedProduct.originalPrice && relatedProduct.originalPrice > relatedProduct.finalPrice && (
+                        <span className="text-sm text-gray-400 line-through">${relatedProduct.originalPrice}</span>
+                      )}
+                    </div>
+                    {relatedProduct.discountPercentage && relatedProduct.discountPercentage > 0 && (
+                      <span className="inline-block mt-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
+                        خصم {relatedProduct.discountPercentage}%
+                      </span>
                     )}
-                  </div>
-                  {relatedProduct.discountPercentage && relatedProduct.discountPercentage > 0 && (
-                    <span className="inline-block mt-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
-                      خصم {relatedProduct.discountPercentage}%
-                    </span>
-                  )}
-                </a>
+                  </a>
+                  {/* Wishlist Icon */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleWishlist(relatedProduct.id);
+                    }}
+                    className="absolute top-6 right-6 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all duration-300 hover:scale-110 cursor-pointer z-10"
+                    title="Add to Wishlist"
+                  >
+                    <Heart
+                      size={16}
+                      className={`transition-colors ${wishlistItems.some((item: any) => item.id === relatedProduct.id) ? 'text-red-500 fill-red-500' : 'text-gray-600 hover:text-red-500'}`}
+                    />
+                  </button>
+                </div>
               ))}
             </div>
           </div>

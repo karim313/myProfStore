@@ -463,6 +463,8 @@ export async function cancelOrder(orderId: number) {
 // Get Cart
 export async function getCart() {
   try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Authentication token is missing');
     const res = await api.get('/api/Cart');
     return res.data;
   } catch (error) {
@@ -474,7 +476,10 @@ export async function getCart() {
 // Add to Cart
 export async function addToCart(data: { productId: number; quantity: number }) {
   try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Authentication token is missing');
     const res = await api.post('/api/Cart', data);
+    window.dispatchEvent(new Event('cartUpdated'));
     return res.data;
   } catch (error) {
     console.error('Failed to add to cart:', error instanceof Error ? error.message : error);
@@ -485,7 +490,10 @@ export async function addToCart(data: { productId: number; quantity: number }) {
 // Update Cart Item
 export async function updateCartItem(cartItemId: number, data: { quantity: number }) {
   try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Authentication token is missing');
     const res = await api.put(`/api/Cart/${cartItemId}`, data);
+    window.dispatchEvent(new Event('cartUpdated'));
     return res.data;
   } catch (error) {
     console.error('Failed to update cart item:', error instanceof Error ? error.message : error);
@@ -496,7 +504,10 @@ export async function updateCartItem(cartItemId: number, data: { quantity: numbe
 // Remove from Cart
 export async function removeFromCart(cartItemId: number) {
   try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Authentication token is missing');
     const res = await api.delete(`/api/Cart/${cartItemId}`);
+    window.dispatchEvent(new Event('cartUpdated'));
     return res.data;
   } catch (error) {
     console.error('Failed to remove from cart:', error instanceof Error ? error.message : error);
@@ -507,7 +518,10 @@ export async function removeFromCart(cartItemId: number) {
 // Clear Cart
 export async function clearCart() {
   try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Authentication token is missing');
     const res = await api.delete('/api/Cart');
+    window.dispatchEvent(new Event('cartUpdated'));
     return res.data;
   } catch (error) {
     console.error('Failed to clear cart:', error instanceof Error ? error.message : error);
@@ -532,6 +546,7 @@ export async function getWishlist() {
 export async function addToWishlist(productId: number) {
   try {
     const res = await api.post(`/api/Wishlist/${productId}`);
+    window.dispatchEvent(new Event('wishlistUpdated'));
     return res.data;
   } catch (error) {
     console.error('Failed to add to wishlist:', error instanceof Error ? error.message : error);
@@ -543,6 +558,7 @@ export async function addToWishlist(productId: number) {
 export async function removeFromWishlist(productId: number) {
   try {
     const res = await api.delete(`/api/Wishlist/${productId}`);
+    window.dispatchEvent(new Event('wishlistUpdated'));
     return res.data;
   } catch (error) {
     console.error('Failed to remove from wishlist:', error instanceof Error ? error.message : error);

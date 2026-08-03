@@ -447,6 +447,36 @@ export async function createOffer(data: {
   }
 }
 
+// Get Offers — GET /api/Offers
+// export async function getOffers() {
+//   try {
+//     const endpoints = ['/api/Offers', '/api/offers', '/api/Offers/get-all', '/api/Offers/all'];
+//     let lastError: unknown;
+
+//     for (const endpoint of endpoints) {
+//       try {
+//         const res = await api.get(endpoint);
+//         const data = res?.data;
+
+//         if (Array.isArray(data)) return data;
+//         if (Array.isArray(data?.items)) return data.items;
+//         if (Array.isArray(data?.offers)) return data.offers;
+//         if (Array.isArray(data?.data)) return data.data;
+//         if (Array.isArray(data?.result)) return data.result;
+
+//         return data;
+//       } catch (error) {
+//         lastError = error;
+//       }
+//     }
+
+//     throw lastError ?? new Error('Failed to fetch offers');
+//   } catch (error) {
+//     console.error('Failed to fetch offers:', error instanceof Error ? error.message : error);
+//     throw error;
+//   }
+// }
+
 // Cancel Order
 export async function cancelOrder(orderId: number) {
   try {
@@ -465,7 +495,11 @@ export async function getCart() {
   try {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Authentication token is missing');
-    const res = await api.get('/api/Cart');
+    const res = await api.get('/api/Cart', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     return res.data;
   } catch (error) {
     console.error('Failed to fetch cart:', error instanceof Error ? error.message : error);
@@ -492,7 +526,11 @@ export async function updateCartItem(cartItemId: number, data: { quantity: numbe
   try {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Authentication token is missing');
-    const res = await api.put(`/api/Cart/${cartItemId}`, data);
+    const res = await api.put(`/api/Cart/items/${cartItemId}`, data,{
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     window.dispatchEvent(new Event('cartUpdated'));
     return res.data;
   } catch (error) {
@@ -502,11 +540,17 @@ export async function updateCartItem(cartItemId: number, data: { quantity: numbe
 }
 
 // Remove from Cart
-export async function removeFromCart(cartItemId: number) {
+export async function removeFromCart(productId: number) {
   try {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Authentication token is missing');
-    const res = await api.delete(`/api/Cart/${cartItemId}`);
+
+    const res = await api.delete(`/api/Cart/${productId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
     window.dispatchEvent(new Event('cartUpdated'));
     return res.data;
   } catch (error) {
@@ -520,7 +564,11 @@ export async function clearCart() {
   try {
     const token = localStorage.getItem('token');
     if (!token) throw new Error('Authentication token is missing');
-    const res = await api.delete('/api/Cart');
+    const res = await api.delete('/api/Cart/clear',{
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     window.dispatchEvent(new Event('cartUpdated'));
     return res.data;
   } catch (error) {

@@ -472,7 +472,7 @@
   border: 1.5px solid transparent;
 }
 .cart-btn--ghost:hover:not(:disabled) {
-  color: #00342B;
+  color: red;
   background: rgba(0,52,43,0.05);
 }
 

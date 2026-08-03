@@ -11,6 +11,8 @@ import { Register } from './pages/Auth/register/Register';
 import FullScreenLoader from './components/Loader/FullScreenLoader';
 import SpecificProduct from './pages/specificProduct/SpecificProduct';
 import Wishlist from './pages/Wishlist/Wishlist';
+import { Toaster } from 'sonner';
+import Deal from './pages/deal/Deal';
 
 const router = createBrowserRouter([
     {path: '/', element: <Layout />, children: [
@@ -37,7 +39,12 @@ const router = createBrowserRouter([
     {
       path:"/wishlist",
       element:<Wishlist></Wishlist>
+    },
+    {
+      path:"deals",
+      element:<Deal/>
     }
+    
     ]},
     {path:'/login',element:<Login/>},
     {path:'/register',element:<Register/>}
@@ -60,7 +67,12 @@ function App() {
     );
   }
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <Toaster position="top-right" richColors />
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export default App

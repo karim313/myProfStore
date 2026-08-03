@@ -27,6 +27,7 @@ import {
   Truck,
   Tag
 } from 'lucide-react'
+import { useCartAnimation } from '../hooks/cart/useCartAnimation'
 
 // Mock Data
 const PROMO_MESSAGES = [
@@ -144,6 +145,8 @@ export default function Navbar() {
   const categorySelectorRef = useRef<HTMLDivElement>(null)
 
   // Carousel timer
+  const { isBouncing } = useCartAnimation()
+  
   useEffect(() => {
     const timer = setInterval(() => {
       setPromoIndex((prev) => (prev + 1) % PROMO_MESSAGES.length)
@@ -154,6 +157,14 @@ export default function Navbar() {
   // Fetch cart and wishlist counts
   useEffect(() => {
     const fetchCounts = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // User is not authenticated, set counts to 0
+        setCartCount(0);
+        setWishlistCount(0);
+        return;
+      }
+
       try {
         const [cartRes, wishlistRes] = await Promise.all([
           getCart(),
@@ -169,6 +180,9 @@ export default function Navbar() {
         }
       } catch (error) {
         console.error('Failed to fetch navbar counts', error);
+        // Set counts to 0 on error
+        setCartCount(0);
+        setWishlistCount(0);
       }
     };
     
@@ -542,15 +556,30 @@ export default function Navbar() {
               onClick={() => { setCartOpen(!cartOpen); setAccountOpen(false); setMenuOpen(false); }}
               className="flex items-center space-x-2.5 p-2 md:pl-2.5 md:pr-3.5 text-slate-700 hover:text-brand hover:bg-brand/10 rounded-xl transition-all duration-200 cursor-pointer relative"
               aria-label="Shopping Cart"
+              data-cart-target="true"
             >
-              <div className="relative">
+              <motion.div
+                className="relative"
+                animate={isBouncing ? {
+                  scale: [1, 1.2, 0.9, 1.1, 1],
+                  rotate: [0, -10, 10, -5, 0]
+                } : {}}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              >
                 <ShoppingCart className="w-5.5 h-5.5" />
                 {totalItemCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 bg-brand text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white">
+                  <motion.span
+                    animate={isBouncing ? {
+                      scale: [0.8, 1.35, 1],
+                      boxShadow: ["0 0 0 0 rgba(16, 185, 129, 0)", "0 0 0 10px rgba(16, 185, 129, 0)", "0 0 0 0 rgba(16, 185, 129, 0)"]
+                    } : {}}
+                    transition={{ duration: 0.5 }}
+                    className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 bg-brand text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white"
+                  >
                     {totalItemCount}
-                  </span>
+                  </motion.span>
                 )}
-              </div>
+              </motion.div>
               <div className="hidden sm:flex flex-col text-left text-xs">
                 <span className="text-[10px] text-slate-400 font-semibold uppercase leading-none">Cart</span>
                 <span className="font-bold text-slate-800 mt-0.5">${cartTotal.toFixed(2)}</span>
@@ -690,7 +719,7 @@ export default function Navbar() {
                 { label: 'Dashboard', to: '/dashboard' },
                 { label: 'Cart', to: '/cart' },
                 { label: 'Deals', to: '/deals' },
-                { label: 'New Arrivals', to: '/new-arrivals' },
+                // { label: 'New Arrivals', to: '/new-arrivals' },
               ].map(({ label, to }) => (
                 <NavLink
                   key={to}

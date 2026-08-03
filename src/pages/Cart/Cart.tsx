@@ -12,17 +12,140 @@ import {
   Shield,
   RotateCcw,
   ChevronRight,
-  PackageOpen,
   X,
-  CheckCircle2,
-  MapPin,
-  LogIn,
 } from 'lucide-react';
 import './Cart.css';
+import { clearCart, getCart, getProductById, removeFromCart, updateCartItem } from '@/api/axios';
+import { useEffect, useState } from 'react';
+import type { Product } from '@/interface';
 
+function getCartItemId(item: any): number | null {
+  const candidates = [
+    item?.id,
+    item?.cartItemId,
+    item?.cartItem?.id,
+    item?.cartItem?.cartItemId,
+    item?.item?.id,
+    item?.item?.cartItemId,
+  ];
 
+  const matched = candidates.find((value) => typeof value === 'number' && Number.isFinite(value));
+  return matched != null ? Number(matched) : null;
+}
+
+function getCartItemProductId(item: any): number | null {
+  const candidates = [
+    item?.productId,
+    item?.product?.id,
+    item?.product?.productId,
+    item?.item?.productId,
+    item?.item?.product?.id,
+  ];
+
+  const matched = candidates.find((value) => typeof value === 'number' && Number.isFinite(value));
+  return matched != null ? Number(matched) : null;
+}
+
+function getCartItemQuantity(item: any): number {
+  return Number(item?.quantity ?? item?.qty ?? item?.cartItem?.quantity ?? 1) || 1;
+}
+
+function getCartItemsPayload(data: any): any[] {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.cartItems)) return data.cartItems;
+  if (Array.isArray(data?.data?.items)) return data.data.items;
+  if (Array.isArray(data?.data?.cartItems)) return data.data.cartItems;
+  return [];
+}
 
 export default function Cart() {
+  const [cart, setCart] = useState<{
+    id: number;
+    productId: number;
+    quantity: number;
+    product: Product;
+  }[]>([])
+  const [updatingItemId, setUpdatingItemId] = useState<number | null>(null);
+
+  async function getCartProducts() {
+    try {
+      const res = await getCart()
+      console.log('Cart GET response:', res);
+      const cartItemsPayload = getCartItemsPayload(res);
+      console.log('Cart items payload:', cartItemsPayload);
+      const fullCart = await Promise.all(
+        cartItemsPayload.map(async (item: any) => {
+          const cartItemId = getCartItemId(item);
+          const productId = getCartItemProductId(item);
+
+          if (!cartItemId || !productId) return null;
+
+          const product = await getProductById(productId);
+
+          return {
+            id: cartItemId,
+            productId,
+            quantity: getCartItemQuantity(item),
+            product
+          };
+        })
+      );
+      setCart(fullCart.filter(Boolean) as typeof cart);
+    } catch (error) {
+      console.error('Failed to fetch cart:', error);
+    }
+  }
+
+  useEffect(() => {
+    getCartProducts()
+  }, [])
+
+    // Update quantity
+  async function handleUpdateQty(cartItemId: number, quantity: number) {
+    if (!cartItemId || quantity < 1) return;
+
+    setUpdatingItemId(cartItemId);
+    try {
+      const response = await updateCartItem(cartItemId, { quantity });
+      const updatedQuantity = response?.cartItem?.quantity ?? quantity;
+      const updatedCartItemId = getCartItemId(response?.cartItem ?? {});
+
+      setCart(prev => prev.map(item =>
+        item.id === cartItemId
+          ? { ...item, id: updatedCartItemId ?? item.id, quantity: updatedQuantity }
+          : item
+      ));
+    } catch (error) {
+      console.error('Failed to update quantity:', error);
+    } finally {
+      setUpdatingItemId(null);
+    }
+  }
+
+  // Remove item
+  async function handleRemoveItem(cartItemId: number, productId?: number) {
+    try {
+      console.log('Removing cart item with id:', cartItemId, 'product id:', productId);
+      await removeFromCart(productId ?? cartItemId);
+      setCart(prev => prev.filter(item => item.id !== cartItemId));
+    } catch (error) {
+      console.error('Failed to remove item:', error);
+    }
+  }
+
+  // Clear cart
+  async function handleClearCart() {
+    try {
+      await clearCart();
+      setCart([]);
+    } catch (error) {
+      console.error('Failed to clear cart:', error);
+    }
+  }
+
+
+
   return (
     <div className="cart-page">
       <div className="cart-container">
@@ -44,8 +167,11 @@ export default function Cart() {
               <span>Shopping Cart</span>
             </nav>
           </div>
-          <button className="cart-btn cart-btn--ghost cart-btn--sm">
-            <Trash2 size={14} />
+          <button
+            className="cart-btn cart-btn--ghost cart-btn--sm  hover:text-red-500"
+            onClick={handleClearCart}
+          >
+            <Trash2 size={14} className=' hover:text-red-500' />
             Clear All
           </button>
         </motion.div>
@@ -63,45 +189,78 @@ export default function Cart() {
             </div>
 
             {/* Cart Item - Example */}
-            <div className="cart-item">
+            {
+              cart.map((item, index) => (
+                <div className="cart-item" key={item.id ?? `${item.productId}-${index}`}>
               {/* Image */}
-              <Link to="/product/1" className="cart-item__image-wrap">
-                <img src="https://via.placeholder.com/120" alt="Product" className="cart-item__image" />
-                <span className="cart-item__badge">-20%</span>
+              <Link to={`/product/${item.product.id}`} className="cart-item__image-wrap">
+                <img src={item.product.mainImage || 'https://placehold.co/120?text=Product'} alt={item.product.name} className="cart-item__image" />
+                <span className="cart-item__badge">{item.product.discountPercentage}%</span>
               </Link>
 
               {/* Info */}
               <div className="cart-item__info">
-                <Link to="/product/1" className="cart-item__name">
-                  Product Name Here
+                <Link to={`/product/${item.product.id}`} className="cart-item__name">
+                  {item.product.name}
                 </Link>
-                <span className="cart-item__category">Category Name</span>
+                <span className="cart-item__category">{item.product.category}</span>
                 <span className="cart-item__low-stock">
-                  Only 3 left!
+                  Only {item.product.stockQuantity} left!
                 </span>
               </div>
 
               {/* Price */}
               <div className="cart-item__price-col">
-                <span className="cart-item__price">$99.99</span>
-                <span className="cart-item__original">$129.99</span>
+                <span className="cart-item__price">${item.product.finalPrice}</span>
+                {
+                  item.product.originalPrice != item.product.finalPrice ? (
+                    <span className="cart-item__original">${item.product.originalPrice}</span>
+                  ) : (
+                    null
+                  )
+                }
               </div>
 
               {/* Qty stepper */}
               <div className="cart-item__qty">
-                <button className="cart-qty-btn"><Minus size={13} /></button>
-                <span className="cart-qty-value">1</span>
-                <button className="cart-qty-btn"><Plus size={13} /></button>
+                <button
+                  className="cart-qty-btn"
+                  disabled={updatingItemId === item.id || item.quantity <= 1}
+                  onClick={() => {
+                    if (item.quantity > 1) {
+                      handleUpdateQty(item.id, item.quantity - 1);
+                    }
+                  }}
+                >
+                  <Minus size={13} />
+                </button>
+                <span className="cart-qty-value">{item.quantity}</span>
+                <button
+                  className="cart-qty-btn"
+                  disabled={updatingItemId === item.id}
+                  onClick={() => {
+                    handleUpdateQty(item.id, item.quantity + 1);
+                  }}
+                >
+                  <Plus size={13} />
+                </button>
               </div>
 
               {/* Item Total */}
-              <div className="cart-item__total">$99.99</div>
+              <div className="cart-item__total">${(item.product.finalPrice * item.quantity).toFixed(2)}</div>
 
               {/* Remove */}
-              <button className="cart-item__remove" aria-label="Remove item">
+              <button
+                className="cart-item__remove"
+                aria-label="Remove item"
+                onClick={() => handleRemoveItem(item.id, item.productId)}
+              >
                 <X size={15} />
               </button>
             </div>
+              ))
+            }
+            
 
             {/* Promo Badges */}
             <motion.div

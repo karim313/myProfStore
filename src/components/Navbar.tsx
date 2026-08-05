@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { getCart, getWishlist } from '../api/axios'
+import { getCart, getProductById, getWishlist, removeFromCart, updateCartItem } from '../api/axios'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
@@ -28,6 +28,7 @@ import {
   Tag
 } from 'lucide-react'
 import { useCartAnimation } from '../hooks/cart/useCartAnimation'
+import type { Product } from '../interface'
 
 // Mock Data
 const PROMO_MESSAGES = [
@@ -82,11 +83,9 @@ const SEARCH_SUGGESTIONS = [
 
 interface CartItem {
   id: number
-  title: string
-  price: number
+  productId: number
   quantity: number
-  image: string
-  size?: string
+  product: Product
 }
 
 export default function Navbar() {
@@ -112,27 +111,8 @@ export default function Navbar() {
   // Cart & Wishlist Drawer
   const [cartOpen, setCartOpen] = useState(false)
   const [wishlistCount, setWishlistCount] = useState(0)
-  const [cartCount, setCartCount] = useState(0)
-
-  // Mock Cart Items
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    {
-      id: 1,
-      title: 'Sony WH-1000XM5 Wireless Headphones',
-      price: 349.99,
-      quantity: 1,
-      image: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=120&h=120&q=80',
-      size: 'Midnight Black'
-    },
-    {
-      id: 2,
-      title: 'Nike Air Max Running Shoes',
-      price: 129.99,
-      quantity: 2,
-      image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=120&h=120&q=80',
-      size: 'US 10'
-    }
-  ])
+  const [updatingItemId, setUpdatingItemId] = useState<number | null>(null)
+  const [cartItems, setCartItems] = useState<CartItem[]>([])
 
   // Promo message carousel index
   const [promoIndex, setPromoIndex] = useState(0)
@@ -146,7 +126,89 @@ export default function Navbar() {
 
   // Carousel timer
   const { isBouncing } = useCartAnimation()
-  
+
+  function getCartItemsPayload(data: any): any[] {
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data?.items)) return data.items
+    if (Array.isArray(data?.cartItems)) return data.cartItems
+    if (Array.isArray(data?.data?.items)) return data.data.items
+    if (Array.isArray(data?.data?.cartItems)) return data.data.cartItems
+    return []
+  }
+
+  function getCartItemId(item: any): number | null {
+    const candidates = [
+      item?.id,
+      item?.cartItemId,
+      item?.cartItem?.id,
+      item?.cartItem?.cartItemId,
+      item?.item?.id,
+      item?.item?.cartItemId,
+    ]
+
+    const matched = candidates.find((value) => typeof value === 'number' && Number.isFinite(value))
+    return matched != null ? Number(matched) : null
+  }
+
+  function getCartItemProductId(item: any): number | null {
+    const candidates = [
+      item?.productId,
+      item?.product?.id,
+      item?.product?.productId,
+      item?.item?.productId,
+      item?.item?.product?.id,
+    ]
+
+    const matched = candidates.find((value) => typeof value === 'number' && Number.isFinite(value))
+    return matched != null ? Number(matched) : null
+  }
+
+  function getCartItemQuantity(item: any): number {
+    return Number(item?.quantity ?? item?.qty ?? item?.cartItem?.quantity ?? 1) || 1
+  }
+
+  const refreshCartData = async () => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      setCartItems([])
+      setWishlistCount(0)
+      return
+    }
+
+    try {
+      const [cartRes, wishlistRes] = await Promise.all([
+        getCart(),
+        getWishlist(),
+      ])
+
+      const cartItemsPayload = getCartItemsPayload(cartRes)
+      const fullCart = await Promise.all(
+        cartItemsPayload.map(async (item: any) => {
+          const cartItemId = getCartItemId(item)
+          const productId = getCartItemProductId(item)
+
+          if (!cartItemId || !productId) return null
+
+          const product = await getProductById(productId)
+
+          return {
+            id: cartItemId,
+            productId,
+            quantity: getCartItemQuantity(item),
+            product,
+          }
+        })
+      )
+
+      setCartItems(fullCart.filter(Boolean) as CartItem[])
+      setWishlistCount(Array.isArray(wishlistRes) ? wishlistRes.length : 0)
+    } catch (error) {
+      console.error('Failed to fetch navbar cart data', error)
+      setCartItems([])
+      setWishlistCount(0)
+    }
+  }
+
   useEffect(() => {
     const timer = setInterval(() => {
       setPromoIndex((prev) => (prev + 1) % PROMO_MESSAGES.length)
@@ -154,49 +216,21 @@ export default function Navbar() {
     return () => clearInterval(timer)
   }, [])
 
-  // Fetch cart and wishlist counts
   useEffect(() => {
-    const fetchCounts = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        // User is not authenticated, set counts to 0
-        setCartCount(0);
-        setWishlistCount(0);
-        return;
-      }
+    refreshCartData()
 
-      try {
-        const [cartRes, wishlistRes] = await Promise.all([
-          getCart(),
-          getWishlist()
-        ]);
-        
-        if (cartRes && cartRes.items) {
-          setCartCount(cartRes.items.length);
-        }
-        
-        if (wishlistRes) {
-          setWishlistCount(wishlistRes.length);
-        }
-      } catch (error) {
-        console.error('Failed to fetch navbar counts', error);
-        // Set counts to 0 on error
-        setCartCount(0);
-        setWishlistCount(0);
-      }
-    };
-    
-    fetchCounts();
+    const handleCartUpdated = () => {
+      refreshCartData()
+    }
 
-    // Listen for custom events dispatched from API methods
-    window.addEventListener('cartUpdated', fetchCounts);
-    window.addEventListener('wishlistUpdated', fetchCounts);
+    window.addEventListener('cartUpdated', handleCartUpdated)
+    window.addEventListener('wishlistUpdated', handleCartUpdated)
 
     return () => {
-      window.removeEventListener('cartUpdated', fetchCounts);
-      window.removeEventListener('wishlistUpdated', fetchCounts);
-    };
-  }, []);
+      window.removeEventListener('cartUpdated', handleCartUpdated)
+      window.removeEventListener('wishlistUpdated', handleCartUpdated)
+    }
+  }, [])
 
   // Close modals on click outside
   useEffect(() => {
@@ -237,24 +271,47 @@ export default function Navbar() {
   }, [])
 
   // Cart operations
-  const updateQty = (id: number, delta: number) => {
-    setCartItems(prev =>
-      prev.map(item => {
-        if (item.id === id) {
-          const newQty = Math.max(1, item.quantity + delta)
-          return { ...item, quantity: newQty }
-        }
-        return item
-      })
-    )
+  const updateQty = async (id: number, delta: number) => {
+    const targetItem = cartItems.find((item) => item.id === id)
+    if (!targetItem) return
+
+    const nextQty = Math.max(1, targetItem.quantity + delta)
+    setUpdatingItemId(id)
+
+    try {
+      await updateCartItem(targetItem.id, { quantity: nextQty })
+      setCartItems(prev =>
+        prev.map((item) => (item.id === id ? { ...item, quantity: nextQty } : item))
+      )
+      await refreshCartData()
+    } catch (error) {
+      console.error('Failed to update navbar cart quantity', error)
+    } finally {
+      setUpdatingItemId(null)
+    }
   }
 
-  const removeItem = (id: number) => {
-    setCartItems(prev => prev.filter(item => item.id !== id))
+  const removeItem = async (id: number) => {
+    const targetItem = cartItems.find((item) => item.id === id)
+    if (!targetItem) return
+
+    try {
+      await removeFromCart(targetItem.productId)
+      setCartItems(prev => prev.filter((item) => item.id !== id))
+      await refreshCartData()
+    } catch (error) {
+      console.error('Failed to remove navbar cart item', error)
+    }
   }
 
-  const cartTotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0)
-  const totalItemCount = cartCount // Using fetched cart items length
+  const cartTotal = cartItems.reduce((acc, item) => acc + Number(item.product.finalPrice ?? 0) * item.quantity, 0)
+  const totalItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
+  const subtotal = cartItems.reduce((acc, item) => acc + Number(item.product.finalPrice ?? 0) * item.quantity, 0)
+  const savings = cartItems.reduce(
+    (acc, item) => acc + (Number(item.product.originalPrice ?? 0) - Number(item.product.finalPrice ?? 0)) * item.quantity,
+    0
+  )
+  const shipping = subtotal > 50 ? 'FREE' : 'FREE'
 
   return (
     <header className="w-full fixed top-0 left-0 z-50 bg-white border-b border-gray-100 shadow-xs">
@@ -815,43 +872,60 @@ export default function Navbar() {
                 ) : (
                   cartItems.map((item) => (
                     <div key={item.id} className="flex gap-4 p-3 border border-slate-100 rounded-xl bg-slate-50/50 hover:bg-slate-50 transition-colors relative group">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="w-20 h-20 object-cover rounded-lg border border-slate-200"
-                      />
+                      <Link to={`/product/${item.product.id}`} className="shrink-0">
+                        <img
+                          src={item.product.mainImage || 'https://placehold.co/120?text=Product'}
+                          alt={item.product.name}
+                          className="w-20 h-20 object-cover rounded-lg border border-slate-200"
+                        />
+                      </Link>
                       
                       <div className="flex-1 min-w-0 flex flex-col justify-between">
                         <div>
-                          <p className="text-xs font-bold text-slate-900 line-clamp-2 leading-tight">
-                            {item.title}
-                          </p>
-                          {item.size && (
+                          <Link to={`/product/${item.product.id}`} className="text-xs font-bold text-slate-900 line-clamp-2 leading-tight hover:text-brand transition-colors">
+                            {item.product.name}
+                          </Link>
+                          {item.product.category && (
                             <span className="inline-block text-[10px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md mt-1">
-                              {item.size}
+                              {item.product.category}
                             </span>
                           )}
                         </div>
 
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-sm font-extrabold text-slate-900">${item.price}</span>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-extrabold text-slate-900">
+                              ${Number(item.product.finalPrice ?? 0).toFixed(2)}
+                            </span>
+                            {Number(item.product.originalPrice ?? 0) > Number(item.product.finalPrice ?? 0) && (
+                              <span className="text-[10px] text-slate-400 line-through">
+                                ${Number(item.product.originalPrice ?? 0).toFixed(2)}
+                              </span>
+                            )}
+                          </div>
                           
                           {/* Quantity control */}
                           <div className="flex items-center border border-slate-200 rounded-lg bg-white overflow-hidden">
                             <button
                               onClick={() => updateQty(item.id, -1)}
-                              className="p-1 text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"
+                              disabled={updatingItemId === item.id || item.quantity <= 1}
+                              className="p-1 text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer disabled:opacity-50"
                             >
                               <Minus className="w-3.5 h-3.5" />
                             </button>
                             <span className="px-2 text-xs font-bold text-slate-800">{item.quantity}</span>
                             <button
                               onClick={() => updateQty(item.id, 1)}
-                              className="p-1 text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer"
+                              disabled={updatingItemId === item.id}
+                              className="p-1 text-slate-500 hover:bg-slate-100 transition-colors cursor-pointer disabled:opacity-50"
                             >
                               <Plus className="w-3.5 h-3.5" />
                             </button>
                           </div>
+                        </div>
+
+                        <div className="mt-2 text-[11px] font-semibold text-slate-500">
+                          Item total: ${(Number(item.product.finalPrice ?? 0) * item.quantity).toFixed(2)}
                         </div>
                       </div>
 
@@ -881,11 +955,15 @@ export default function Navbar() {
                   <div className="space-y-1.5">
                     <div className="flex justify-between text-xs text-slate-500 font-semibold">
                       <span>Subtotal</span>
-                      <span>${cartTotal.toFixed(2)}</span>
+                      <span>${subtotal.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs text-slate-500 font-semibold">
+                      <span>Saving</span>
+                      <span className="text-emerald-600">-${savings.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-xs text-slate-500 font-semibold">
                       <span>Shipping</span>
-                      <span className="text-emerald-600">FREE</span>
+                      <span className="text-emerald-600">{shipping}</span>
                     </div>
                     <div className="flex justify-between text-sm font-bold text-slate-900 border-t border-slate-200/60 pt-2.5 mt-2">
                       <span>Grand Total</span>

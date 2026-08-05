@@ -15,7 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import './Cart.css';
-import { clearCart, getCart, getProductById, removeFromCart, updateCartItem } from '@/api/axios';
+import { clearCart, getCart, getProductById, removeFromCart, updateCartItem, createOrder } from '@/api/axios';
 import { useEffect, useState } from 'react';
 import type { Product } from '@/interface';
 
@@ -67,6 +67,7 @@ export default function Cart() {
     product: Product;
   }[]>([])
   const [updatingItemId, setUpdatingItemId] = useState<number | null>(null);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   async function getCartProducts() {
     try {
@@ -143,6 +144,39 @@ export default function Cart() {
       console.error('Failed to clear cart:', error);
     }
   }
+
+  // Checkout
+  async function handleCheckout() {
+    if (cart.length === 0) return;
+    setIsCheckingOut(true);
+    try {
+      const orderData = {
+        items: cart.map(item => ({ productId: item.productId, quantity: item.quantity })),
+        shippingAddress: "Default Shipping Address"
+      };
+      await createOrder(orderData);
+      alert('Order placed successfully!');
+      await handleClearCart();
+    } catch (error) {
+      console.error('Checkout failed:', error);
+      alert('Checkout failed. Please try again.');
+    } finally {
+      setIsCheckingOut(false);
+    }
+  }
+
+  // Calculate order summary
+  const orderSummary = {
+    subtotal: cart.reduce((sum, item) => sum + ((item.product.finalPrice || 0) * item.quantity), 0),
+    originalTotal: cart.reduce((sum, item) => sum + ((item.product.originalPrice || item.product.finalPrice || 0) * item.quantity), 0),
+    savings: 0,
+    shipping: 0,
+    total: 0
+  };
+
+  orderSummary.savings = orderSummary.originalTotal - orderSummary.subtotal;
+  orderSummary.shipping = orderSummary.subtotal > 50 ? 0 : 10; // Free shipping over $50
+  orderSummary.total = orderSummary.subtotal + orderSummary.shipping;
 
 
 
@@ -301,29 +335,35 @@ export default function Cart() {
               {/* Breakdown */}
               <div className="cart-summary__rows">
                 <div className="cart-summary__row">
-                  <span>Subtotal (1 item)</span>
-                  <span>$99.99</span>
+                  <span>Subtotal ({cart.length} {cart.length === 1 ? 'item' : 'items'})</span>
+                  <span>${orderSummary.subtotal.toFixed(2)}</span>
                 </div>
-                <div className="cart-summary__row cart-summary__row--savings">
-                  <span>💸 You Save</span>
-                  <span>-$30.00</span>
-                </div>
+                {orderSummary.savings > 0 && (
+                  <div className="cart-summary__row cart-summary__row--savings">
+                    <span>💸 You Save</span>
+                    <span>-${orderSummary.savings.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="cart-summary__row">
                   <span>Shipping</span>
-                  <span className="text-green">
-                    🎉 Free
+                  <span className={orderSummary.shipping === 0 ? 'text-green' : ''}>
+                    {orderSummary.shipping === 0 ? '🎉 Free' : `$${orderSummary.shipping.toFixed(2)}`}
                   </span>
                 </div>
                 <div className="cart-summary__divider" />
                 <div className="cart-summary__row cart-summary__row--total">
                   <span>Total</span>
-                  <span>$99.99</span>
+                  <span>${orderSummary.total.toFixed(2)}</span>
                 </div>
               </div>
 
               {/* CTA */}
-              <button className="cart-btn cart-btn--primary cart-btn--checkout">
-                Checkout <ArrowRight size={17} />
+              <button 
+                className="cart-btn cart-btn--primary cart-btn--checkout"
+                onClick={handleCheckout}
+                disabled={isCheckingOut || cart.length === 0}
+              >
+                {isCheckingOut ? 'Processing...' : 'Checkout'} <ArrowRight size={17} />
               </button>
 
               <Link to="/category" className="cart-btn cart-btn--ghost cart-btn--continue">

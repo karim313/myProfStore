@@ -385,7 +385,14 @@ export async function uploadProductVideoUrl(productId: number, payload: { videoU
 // Get All Orders
 export async function getOrders() {
   try {
-    const res = await api.get('/api/Orders');
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Authentication token is missing');
+
+    const res = await api.get('/api/Orders', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     return res.data;
   } catch (error) {
     console.error('Failed to fetch orders:', error instanceof Error ? error.message : error);
@@ -396,7 +403,14 @@ export async function getOrders() {
 // Get Order by ID
 export async function getOrderById(orderId: number) {
   try {
-    const res = await api.get(`/api/Orders/${orderId}`);
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Authentication token is missing');
+
+    const res = await api.get(`/api/Orders/${orderId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     return res.data;
   } catch (error) {
     console.error('Failed to fetch order:', error instanceof Error ? error.message : error);
@@ -409,8 +423,15 @@ export async function createOrder(data: {
   items: Array<{ productId: number; quantity: number }>;
   shippingAddress: string;
 }) {
-  try {
-    const res = await api.post('/api/Orders', data);
+try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Authentication token is missing');
+
+    const res = await api.post('/api/Orders/checkout', data, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     return res.data;
   } catch (error) {
     console.error('Failed to create order:', error instanceof Error ? error.message : error);
@@ -421,7 +442,15 @@ export async function createOrder(data: {
 // Update Order Status — status is a query param per the API spec
 export async function updateOrderStatus(orderId: number, data: { status: string }) {
   try {
-    const res = await api.put(`/api/Orders/${orderId}/status`, null, { params: { status: data.status } });
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Authentication token is missing');
+
+    const res = await api.put(`/api/Orders/${orderId}/status`, null, {
+      params: { status: data.status },
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     return res.data;
   } catch (error) {
     console.error('Failed to update order status:', error instanceof Error ? error.message : error);
@@ -477,10 +506,19 @@ export async function createOffer(data: {
 //   }
 // }
 
+
+
 // Cancel Order
 export async function cancelOrder(orderId: number) {
   try {
-    const res = await api.delete(`/api/Orders/${orderId}`);
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Authentication token is missing');
+
+    const res = await api.delete(`/api/Orders/${orderId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
     return res.data;
   } catch (error) {
     console.error('Failed to cancel order:', error instanceof Error ? error.message : error);

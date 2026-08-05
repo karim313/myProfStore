@@ -29,6 +29,8 @@ import {
 } from 'lucide-react'
 import { useCartAnimation } from '../hooks/cart/useCartAnimation'
 import type { Product } from '../interface'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './ui/dialog'
+import { Button } from './ui/button'
 
 // Mock Data
 const PROMO_MESSAGES = [
@@ -113,6 +115,7 @@ export default function Navbar() {
   const [wishlistCount, setWishlistCount] = useState(0)
   const [updatingItemId, setUpdatingItemId] = useState<number | null>(null)
   const [cartItems, setCartItems] = useState<CartItem[]>([])
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false)
 
   // Promo message carousel index
   const [promoIndex, setPromoIndex] = useState(0)
@@ -980,7 +983,7 @@ export default function Navbar() {
                       View Full Cart
                     </Link>
                     <button
-                      onClick={() => alert('Proceeding to checkout...')}
+                      onClick={() => setCheckoutModalOpen(true)}
                       className="w-full py-2.5 bg-brand hover:bg-brand-light text-white text-xs font-bold rounded-xl transition-colors shadow-md hover:shadow-lg flex items-center justify-center space-x-1.5 cursor-pointer"
                     >
                       <span>Checkout</span>
@@ -993,6 +996,25 @@ export default function Navbar() {
           </>
         )}
       </AnimatePresence>
+
+      <Dialog open={checkoutModalOpen} onOpenChange={setCheckoutModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Proceed to checkout?</DialogTitle>
+            <DialogDescription>
+              You&apos;ll be redirected to the full cart flow to complete your order.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="sm:justify-end">
+            <Button variant="outline" onClick={() => setCheckoutModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={() => { setCheckoutModalOpen(false); setCartOpen(false); navigate('/cart'); }}>
+              Continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* 5. MOBILE DRAWER SIDE MENU */}
       <AnimatePresence>

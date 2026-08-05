@@ -6,8 +6,7 @@ import { getPrimaryImage } from "@/lib/productMedia";
 import ProductCardSkeleton from '../../components/cardLoader/CardLoader';
 import { useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
-import type { Product } from '@/interface';
-import { handleAddToCart } from '@/helper/addToCart';
+import { AddToCartButton } from '@/components/Cart/AddToCartButton';
 
 export default function Category() {
   const { reviewedProducts } = useReviewedProducts();
@@ -20,8 +19,6 @@ export default function Category() {
   const [open, setOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [wishlistItems, setWishlistItems] = useState<any[]>([]);
-  const [loadingId, setLoadingId] = useState<number | null>(null);
-  const [addedId, setAddedId] = useState<number | null>(null);
 
   // getAllProducts
   const getAllProducts = async () => {
@@ -88,20 +85,6 @@ export default function Category() {
       console.error('Failed to toggle wishlist:', error);
     }
   };
-
-  async function addProToCart(product: any) {
-    setLoadingId(product.id);
-    try {
-      await handleAddToCart({ productId: product.id, quantity: 1 });
-      setAddedId(product.id);
-      setTimeout(() => setAddedId(null), 2000);
-      console.log(product.id);
-    } catch (error) {
-      console.error('Failed to add to cart:', error);
-    } finally {
-      setLoadingId(null);
-    }
-  }
 
   // ترجع الـ Review الخاص بالمنتج
   const getProductReview = (productId: number) => {
@@ -235,13 +218,10 @@ export default function Category() {
                       <span className="text-xl font-bold text-[#00342B]">
                         ${product.finalPrice}
                       </span>
-                      <button
-                        onClick={() => addProToCart(product)}
-                        disabled={loadingId === product.id}
-                        className="bg-[#00342B] cursor-pointer hover:bg-[#014237] text-white text-sm px-4 py-2 rounded-xl transition duration-300 whitespace-nowrap disabled:opacity-70 disabled:cursor-not-allowed"
-                      >
-                        {loadingId === product.id ? 'Adding...' : addedId === product.id ? 'Added!' : 'Add to Cart'}
-                      </button>
+                      <AddToCartButton
+                        productId={product.id}
+                        imageUrl={getPrimaryImage(product)}
+                      />
                     </div>
                   </div>
                 </div>

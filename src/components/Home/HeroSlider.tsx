@@ -31,7 +31,7 @@ const slides = [
     badge: '✦ مجموعة 2025',
     headline: ['أحدث صيحات', 'الموضة الفاخرة'],
     description: 'قطع حصرية مصممة لمن يقدّرون الندرة ويبحثون عن تفاصيل لا تجدها في أي مكان آخر.',
-    primaryCta: { label: 'تسوق الآن', path: '/products' },
+    primaryCta: { label: 'تسوق الآن', path: '/category' },
     secondaryCta: { label: 'استكشف المجموعة', path: '/category' },
     image: '/hero_banner.png',
     accentColor: '#00342B',

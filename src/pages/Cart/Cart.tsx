@@ -18,6 +18,9 @@ import './Cart.css';
 import { clearCart, getCart, getProductById, removeFromCart, updateCartItem, createOrder } from '@/api/axios';
 import { useEffect, useState } from 'react';
 import type { Product } from '@/interface';
+import ShippingAddressMap from '@/components/ShippingAddressMap/ShippingAddressMap';
+import type { LocationResult } from '@/components/ShippingAddressMap/ShippingAddressMap';
+import { useToast, ToastContainer } from '@/components/Toast/Toast';
 
 function getCartItemId(item: any): number | null {
   const candidates = [
@@ -68,6 +71,9 @@ export default function Cart() {
   }[]>([])
   const [updatingItemId, setUpdatingItemId] = useState<number | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [showMap, setShowMap] = useState(false);
+  const [shippingLocation, setShippingLocation] = useState<LocationResult | null>(null);
+  const { toasts, toast, remove } = useToast();
 
   async function getCartProducts() {
     try {
@@ -119,6 +125,7 @@ export default function Cart() {
       ));
     } catch (error) {
       console.error('Failed to update quantity:', error);
+      toast('Failed to update quantity', 'error', 'Please try again.');
     } finally {
       setUpdatingItemId(null);
     }
@@ -127,11 +134,12 @@ export default function Cart() {
   // Remove item
   async function handleRemoveItem(cartItemId: number, productId?: number) {
     try {
-      console.log('Removing cart item with id:', cartItemId, 'product id:', productId);
       await removeFromCart(productId ?? cartItemId);
       setCart(prev => prev.filter(item => item.id !== cartItemId));
+      toast('Item removed', 'info');
     } catch (error) {
       console.error('Failed to remove item:', error);
+      toast('Could not remove item', 'error', 'Please try again.');
     }
   }
 
@@ -140,26 +148,30 @@ export default function Cart() {
     try {
       await clearCart();
       setCart([]);
+      toast('Cart cleared', 'warning', 'All items have been removed.');
     } catch (error) {
       console.error('Failed to clear cart:', error);
+      toast('Could not clear cart', 'error', 'Please try again.');
     }
   }
 
   // Checkout
   async function handleCheckout() {
     if (cart.length === 0) return;
+    if (!shippingLocation) { setShowMap(true); return; }
     setIsCheckingOut(true);
     try {
       const orderData = {
         items: cart.map(item => ({ productId: item.productId, quantity: item.quantity })),
-        shippingAddress: "Default Shipping Address"
+        shippingAddress: shippingLocation.address
       };
       await createOrder(orderData);
-      alert('Order placed successfully!');
-      await handleClearCart();
+      toast('Order placed! 🎉', 'success', 'Your order has been submitted successfully.');
+      setCart([]);
+      setShippingLocation(null);
     } catch (error) {
       console.error('Checkout failed:', error);
-      alert('Checkout failed. Please try again.');
+      toast('Order failed', 'error', 'Something went wrong. Please try again.');
     } finally {
       setIsCheckingOut(false);
     }
@@ -182,6 +194,36 @@ export default function Cart() {
 
   return (
     <div className="cart-page">
+      <ToastContainer toasts={toasts} onRemove={remove} />
+
+      {/* Shipping Map Modal */}
+      {showMap && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.5)' }}
+        >
+          <div className="w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl bg-white">
+            <ShippingAddressMap
+              onLocationChange={(loc) => setShippingLocation(loc)}
+            />
+            <div className="flex gap-3 p-4 border-t border-gray-100 bg-white">
+              <button
+                className="flex-1 cart-btn cart-btn--ghost"
+                onClick={() => setShowMap(false)}
+              >
+                إلغاء
+              </button>
+              <button
+                className="flex-1 cart-btn cart-btn--primary"
+                disabled={!shippingLocation}
+                onClick={() => { setShowMap(false); handleCheckout(); }}
+              >
+                تأكيد العنوان والطلب <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="cart-container">
         {/* Page Header */}
         <motion.div

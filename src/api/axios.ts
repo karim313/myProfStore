@@ -458,6 +458,24 @@ export async function updateOrderStatus(orderId: number, data: { status: string 
   }
 }
 
+// PaymentsGateway - Paymob payment redirect URL
+export async function paymentsGateway(orderId: number) {
+  try {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Authentication token is missing');
+
+    const res = await api.get(`/api/paymob/${orderId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    return res.data;
+  } catch (error) {
+    console.error('PaymentsGateway failed:', error instanceof Error ? error.message : error);
+    throw error;
+  }
+}
+
 // ==================== Offers ====================
 
 // Create Offer — POST /api/Offers

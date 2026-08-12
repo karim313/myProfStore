@@ -613,6 +613,7 @@ export default function Navbar() {
 
             {/* Cart Button with mini total */}
             <button
+              id="navbar-cart-btn"
               onClick={() => { setCartOpen(!cartOpen); setAccountOpen(false); setMenuOpen(false); }}
               className="flex items-center space-x-2.5 p-2 md:pl-2.5 md:pr-3.5 text-slate-700 hover:text-brand hover:bg-brand/10 rounded-xl transition-all duration-200 cursor-pointer relative"
               aria-label="Shopping Cart"
@@ -696,10 +697,14 @@ export default function Navbar() {
                         <User className="w-4 h-4 text-slate-400 shrink-0" />
                         <span>My Profile</span>
                       </a>
-                      <a href="#orders" className="flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-brand/10 hover:text-brand rounded-lg transition-colors">
+                      <Link
+                        to="/orders"
+                        onClick={() => setAccountOpen(false)}
+                        className="flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-brand/10 hover:text-brand rounded-lg transition-colors"
+                      >
                         <ClipboardList className="w-4 h-4 text-slate-400 shrink-0" />
                         <span>My Orders</span>
-                      </a>
+                      </Link>
                       <a href="#notifications" className="flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-brand/10 hover:text-brand rounded-lg transition-colors">
                         <Bell className="w-4 h-4 text-slate-400 shrink-0" />
                         <span>Notifications</span>
@@ -779,6 +784,7 @@ export default function Navbar() {
                 { label: 'Dashboard', to: '/dashboard' },
                 { label: 'Cart', to: '/cart' },
                 { label: 'Deals', to: '/deals' },
+                { label: 'Orders', to: '/orders' },
                 // { label: 'New Arrivals', to: '/new-arrivals' },
               ].map(({ label, to }) => (
                 <NavLink
@@ -1084,6 +1090,7 @@ export default function Navbar() {
                       { label: 'Categories', to: '/category' },
                       { label: 'Cart', to: '/cart' },
                       { label: 'Deals', to: '/deals' },
+                      { label: 'My Orders', to: '/orders' },
                       { label: 'New Arrivals', to: '/new-arrivals' },
                     ].map(({ label, to }) => (
                       <NavLink

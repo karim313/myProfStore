@@ -13,9 +13,11 @@ import {
   RotateCcw,
   ChevronRight,
   X,
+  MapPin,
+  CreditCard,
 } from 'lucide-react';
 import './Cart.css';
-import { clearCart, getCart, getProductById, removeFromCart, updateCartItem, createOrder } from '@/api/axios';
+import { clearCart, getCart, getProductById, removeFromCart, updateCartItem, createOrder, paymentsGateway } from '@/api/axios';
 import { useEffect, useState } from 'react';
 import type { Product } from '@/interface';
 import ShippingAddressMap from '@/components/ShippingAddressMap/ShippingAddressMap';
@@ -165,7 +167,29 @@ export default function Cart() {
         items: cart.map(item => ({ productId: item.productId, quantity: item.quantity })),
         shippingAddress: shippingLocation.address
       };
-      await createOrder(orderData);
+      const orderResponse = await createOrder(orderData);
+      
+      // Capture the orderId from response
+      const orderId = orderResponse?.orderId || orderResponse?.id || orderResponse?.data?.orderId || orderResponse?.data?.id;
+
+      if (orderId) {
+        try {
+          const paymentRes = await paymentsGateway(Number(orderId));
+          const redirectUrl = paymentRes?.redirectUrl || paymentRes?.paymentUrl || paymentRes?.url || (typeof paymentRes === 'string' ? paymentRes : null);
+
+          if (redirectUrl) {
+            toast('Order placed! Redirecting to payment gateway...', 'success', 'Please complete your payment.');
+            setCart([]);
+            setShippingLocation(null);
+            window.location.href = redirectUrl;
+            return;
+          }
+        } catch (payError) {
+          console.error('Failed to get Paymob checkout URL:', payError);
+          // Fallback to regular order success if payment redirect generation fails
+        }
+      }
+
       toast('Order placed! 🎉', 'success', 'Your order has been submitted successfully.');
       setCart([]);
       setShippingLocation(null);
@@ -374,6 +398,24 @@ export default function Cart() {
                 </button>
               </div>
 
+              {/* Shipping Address Summary */}
+              {shippingLocation && (
+                <div className="p-3.5 mb-1 bg-[#f0f7f4] border border-[#d1fae5] rounded-xl text-xs flex flex-col gap-1.5 animate-fadeIn">
+                  <span className="font-bold text-[#00342B] flex items-center gap-1">
+                    <MapPin size={14} className="text-[#059669] shrink-0" /> Delivery Address
+                  </span>
+                  <span className="text-[#4b5563] line-clamp-2" title={shippingLocation.address}>
+                    {shippingLocation.address}
+                  </span>
+                  <button 
+                    onClick={() => setShowMap(true)} 
+                    className="text-[#00342B] hover:text-[#004d3e] font-bold text-left underline w-fit cursor-pointer"
+                  >
+                    Change Address
+                  </button>
+                </div>
+              )}
+
               {/* Breakdown */}
               <div className="cart-summary__rows">
                 <div className="cart-summary__row">
@@ -405,7 +447,17 @@ export default function Cart() {
                 onClick={handleCheckout}
                 disabled={isCheckingOut || cart.length === 0}
               >
-                {isCheckingOut ? 'Processing...' : 'Checkout'} <ArrowRight size={17} />
+                {isCheckingOut ? (
+                  'Processing...'
+                ) : shippingLocation ? (
+                  <>
+                    Pay Now <CreditCard size={17} />
+                  </>
+                ) : (
+                  <>
+                    Checkout <ArrowRight size={17} />
+                  </>
+                )}
               </button>
 
               <Link to="/category" className="cart-btn cart-btn--ghost cart-btn--continue">

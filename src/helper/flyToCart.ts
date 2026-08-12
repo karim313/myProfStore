@@ -1,13 +1,12 @@
 export function flyToCart(event: React.MouseEvent | MouseEvent, imageUrl: string) {
-  // Find cart icon element in DOM
-  const cartIcon = document.querySelector('[aria-label="Shopping Cart"]');
-  if (!cartIcon) return;
+  // Always target the top-right navbar cart icon by id
+  const cartBtn = document.getElementById('navbar-cart-btn');
+  const cartRect = cartBtn?.getBoundingClientRect();
 
-  const cartRect = cartIcon.getBoundingClientRect();
-  const targetX = cartRect.left + cartRect.width / 2;
-  const targetY = cartRect.top + cartRect.height / 2;
+  const targetX = cartRect ? cartRect.left + cartRect.width / 2 : window.innerWidth - 56;
+  const targetY = cartRect ? cartRect.top + cartRect.height / 2 : 36;
 
-  // Find source element (the button clicked)
+  // Source element (the button clicked)
   const button = event.currentTarget as HTMLElement;
   const btnRect = button.getBoundingClientRect();
   const startX = btnRect.left + btnRect.width / 2;
@@ -16,38 +15,39 @@ export function flyToCart(event: React.MouseEvent | MouseEvent, imageUrl: string
   // Create flying element
   const flyingImg = document.createElement('img');
   flyingImg.src = imageUrl;
-  flyingImg.style.position = 'fixed';
-  flyingImg.style.left = `${startX}px`;
-  flyingImg.style.top = `${startY}px`;
-  flyingImg.style.width = '60px';
-  flyingImg.style.height = '60px';
-  flyingImg.style.objectFit = 'cover';
-  flyingImg.style.borderRadius = '50%';
-  flyingImg.style.transform = 'translate(-50%, -50%) scale(1)';
-  flyingImg.style.zIndex = '9999';
-  flyingImg.style.transition = 'all 0.8s cubic-bezier(0.2, 1, 0.2, 1)';
-  flyingImg.style.boxShadow = '0 10px 25px rgba(0,0,0,0.3)';
-  flyingImg.style.pointerEvents = 'none';
-  
+  flyingImg.style.cssText = `
+    position:fixed;
+    left:${startX}px;
+    top:${startY}px;
+    width:60px;
+    height:60px;
+    object-fit:cover;
+    border-radius:50%;
+    transform:translate(-50%,-50%) scale(1);
+    z-index:9999;
+    transition:left 0.75s cubic-bezier(0.25,1,0.5,1), top 0.75s cubic-bezier(0.25,1,0.5,1), transform 0.75s ease, opacity 0.75s ease;
+    box-shadow:0 8px 24px rgba(0,0,0,0.25);
+    pointer-events:none;
+  `;
+
   document.body.appendChild(flyingImg);
 
-  // Trigger animation
+  // Trigger animation on next frame
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       flyingImg.style.left = `${targetX}px`;
       flyingImg.style.top = `${targetY}px`;
-      flyingImg.style.transform = 'translate(-50%, -50%) scale(0.2)';
-      flyingImg.style.opacity = '0.3';
+      flyingImg.style.transform = 'translate(-50%,-50%) scale(0.15)';
+      flyingImg.style.opacity = '0';
     });
   });
 
-  // Remove element after animation finishes
   setTimeout(() => {
     flyingImg.remove();
-    // Add a little pop effect to the cart icon
-    cartIcon.classList.add('scale-125');
-    setTimeout(() => {
-      cartIcon.classList.remove('scale-125');
-    }, 200);
-  }, 800);
+    if (cartBtn) {
+      cartBtn.style.transition = 'transform 0.15s ease';
+      cartBtn.style.transform = 'scale(1.3)';
+      setTimeout(() => { cartBtn.style.transform = 'scale(1)'; }, 200);
+    }
+  }, 780);
 }

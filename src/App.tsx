@@ -13,6 +13,7 @@ import SpecificProduct from './pages/specificProduct/SpecificProduct';
 import Wishlist from './pages/Wishlist/Wishlist';
 import { Toaster } from 'sonner';
 import Deal from './pages/deal/Deal';
+import Orders from './pages/Orders/Orders';
 
 const router = createBrowserRouter([
     {path: '/', element: <Layout />, children: [
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
     {
       path:"deals",
       element:<Deal/>
+    },
+    {
+      path: "/orders",
+      element: <Orders />
     }
     
     ]},

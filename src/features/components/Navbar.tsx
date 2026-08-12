@@ -502,6 +502,7 @@ export default function Navbar() {
 
             {/* Cart Button with mini total */}
             <button
+              id="navbar-cart-btn"
               onClick={() => { setCartOpen(!cartOpen); setAccountOpen(false); setMenuOpen(false); }}
               className="flex items-center space-x-2.5 p-2 md:pl-2.5 md:pr-3.5 text-slate-700 hover:text-brand hover:bg-brand/10 rounded-xl transition-all duration-200 cursor-pointer relative"
               aria-label="Shopping Cart"

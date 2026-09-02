@@ -5,15 +5,15 @@ import Home from './pages/Home/Home';
 import Category from './pages/Categories/Category';
 import Cart from './pages/Cart/Cart';
 import Layout from './Layouts/Layout';
-import Dashboard from './pages/dashborad/Dashboard';
-import {Login} from './pages/Auth/login/Login';
-import { Register } from './pages/Auth/register/Register';
+import Dashboard from './pages/dashboard/Dashboard';
+import { AuthPage } from './pages/Auth/AuthPage';
 import FullScreenLoader from './components/Loader/FullScreenLoader';
 import SpecificProduct from './pages/specificProduct/SpecificProduct';
 import Wishlist from './pages/Wishlist/Wishlist';
 import { Toaster } from 'sonner';
 import Deal from './pages/deal/Deal';
 import Orders from './pages/Orders/Orders';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 const router = createBrowserRouter([
     {path: '/', element: <Layout />, children: [
@@ -21,39 +21,68 @@ const router = createBrowserRouter([
         index: true,
         element: <Home></Home>
       },
-      {
-        path: "/dashboard",
-        element:<Dashboard></Dashboard>
-      },
     {
       path:"/category",
       element:<Category></Category>
     },
     {
       path:"/product/:id",
-      element:<SpecificProduct></SpecificProduct>
+      element: (
+        <ProtectedRoute>
+          <SpecificProduct></SpecificProduct>
+        </ProtectedRoute>
+      )
     },
     {
       path:"/cart",
-      element:<Cart></Cart>
+      element: (
+        <ProtectedRoute>
+          <Cart></Cart>
+        </ProtectedRoute>
+      )
+    },
+    {
+      path:"/dashboard",
+      element: (
+        <ProtectedRoute>
+          <Dashboard></Dashboard>
+        </ProtectedRoute>
+      )
     },
     {
       path:"/wishlist",
-      element:<Wishlist></Wishlist>
+      element: (
+        <ProtectedRoute>
+          <Wishlist></Wishlist>
+        </ProtectedRoute>
+      )
     },
     {
       path:"deals",
-      element:<Deal/>
+      element: (
+        <ProtectedRoute>
+          <Deal/>
+        </ProtectedRoute>
+      )
     },
     {
       path: "/orders",
-      element: <Orders />
+      element: (
+        <ProtectedRoute>
+          <Orders />
+        </ProtectedRoute>
+      )
     }
     
     ]},
-    {path:'/login',element:<Login/>},
-    {path:'/register',element:<Register/>}
-  ]);
+    {path:'/login',element:<AuthPage/>},
+    {path:'/register',element:<AuthPage/>}
+  ],
+  {
+    future: {
+      v7_startTransition: true,
+    },
+  });
 
 function App() {
   const [isAppLoading, setIsAppLoading] = useState(true);

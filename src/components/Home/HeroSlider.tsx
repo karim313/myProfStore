@@ -17,11 +17,14 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence, type Variants } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import SmartMatchDrawer from '../../features/smart-match/components/SmartMatchDrawer'
 import SmartMatchButton from '../../features/smart-match/components/SmartMatchButton'
+import { gsap } from '../../utils/gsap'
+
+type Variants = Record<string, any>
 
 // ─── Slide Data ───────────────────────────────────────────────────────────────
 // غيّر الصور هنا لو حبيت تضيف صور تانية
@@ -98,6 +101,27 @@ export default function HeroSlider() {
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
+  const heroImageRef = useRef<HTMLDivElement>(null)
+
+  // ── Mouse parallax on hero image ────────────────────────────────────────────
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!heroImageRef.current) return;
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const dx = (e.clientX - rect.left - rect.width / 2) / rect.width;
+    const dy = (e.clientY - rect.top - rect.height / 2) / rect.height;
+    gsap.to(heroImageRef.current, {
+      duration: 0.8,
+      ease: 'power2.out',
+      x: dx * 20,
+      y: dy * 12,
+    });
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (!heroImageRef.current) return;
+    gsap.to(heroImageRef.current, { duration: 1, ease: 'power2.out', x: 0, y: 0 });
+  }, []);
 
   const total = slides.length
 
@@ -130,7 +154,7 @@ export default function HeroSlider() {
   // ── Keyboard navigation ──────────────────────────────────────────────────────
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft')  goNext()  // RTL: left = forward
+      if (e.key === 'ArrowLeft') goNext()  // RTL: left = forward
       if (e.key === 'ArrowRight') goPrev()  // RTL: right = backward
     }
     window.addEventListener('keydown', handleKey)
@@ -157,7 +181,8 @@ export default function HeroSlider() {
       style={{ minHeight: 'clamp(520px, 82vh, 800px)', background: slide.lightColor, transition: 'background 0.9s ease' }}
       dir="rtl"
       onMouseEnter={() => setIsPaused(true)}
-      onMouseLeave={() => setIsPaused(false)}
+      onMouseLeave={() => { setIsPaused(false); handleMouseLeave(); }}
+      onMouseMove={handleMouseMove}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       aria-label="عرض تقديمي للمنتجات المميزة"
@@ -191,6 +216,7 @@ export default function HeroSlider() {
                 animate="center"
                 exit="exit"
                 className="relative w-full max-w-[480px]"
+                ref={heroImageRef}
               >
                 {/* Floating glow ring */}
                 <div
@@ -298,7 +324,7 @@ export default function HeroSlider() {
                 </motion.div>
 
                 {/* 5. Smart Match Button (Always visible in Hero) */}
-                <SmartMatchButton 
+                <SmartMatchButton
                   onClick={() => setIsDrawerOpen(true)}
                   accentColor={slide.accentColor}
                   variants={textItemVariants}

@@ -17,11 +17,13 @@
  */
 
 import { useState, useEffect, useRef, useCallback, type TouchEvent } from 'react'
-import { motion, AnimatePresence, type Variants } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react'
 import SmartMatchDrawer from '../../smart-match/components/SmartMatchDrawer'
 import SmartMatchButton from '../../smart-match/components/SmartMatchButton'
+
+type Variants = Record<string, any>
 
 // ─── Slide Data ───────────────────────────────────────────────────────────────
 // غيّر الصور هنا لو حبيت تضيف صور تانية

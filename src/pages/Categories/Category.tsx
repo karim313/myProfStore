@@ -1,20 +1,22 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { getCategories, getProducts, addToWishlist, removeFromWishlist, getWishlist } from '../../api/axios'
 import { useReviewedProducts } from "../../Context/ReviewedProductsContext";
 import ProductReviewsDialog from "@/components/Dialog/ProductReviewsDialog";
 import { getPrimaryImage } from "@/lib/productMedia";
 import ProductCardSkeleton from '../../components/cardLoader/CardLoader';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { AddToCartButton } from '@/components/Cart/AddToCartButton';
+import { motion } from 'framer-motion';
 
 export default function Category() {
   const { reviewedProducts } = useReviewedProducts();
   const navigate = useNavigate();
 
+  const location = useLocation();
   const [allProducts, setAllProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [sortType, setSortType] = useState("");
   const [open, setOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<any>(null);
@@ -64,6 +66,12 @@ export default function Category() {
     fetchWishlist();
   }, []);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const category = params.get('category')?.trim() || 'all';
+    setSelectedCategory(category);
+  }, [location.search]);
+
   const handleProductClick = (productId: number) => {
     navigate(`/product/${productId}`);
   };
@@ -93,31 +101,73 @@ export default function Category() {
     );
   };
 
-  console.log(categories);
-  console.log(Array.isArray(categories));
+  const searchQuery = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get('search')?.trim().toLowerCase() || '';
+  }, [location.search]);
 
-  const filteredProducts = allProducts.filter((product) => {
-    if (selectedCategory === "all") return true;
-    console.log("Filtering:", product);
-    return product.categoryId === parseInt(selectedCategory) || product.category === categories.find(c => c.id.toString() === selectedCategory)?.name;
-  }).sort((a, b) => {
-    switch (sortType) {
-      case "price-low":
-        return a.finalPrice - b.finalPrice;
-      case "price-high":
-        return b.finalPrice - a.finalPrice;
-      case "rating":
-        const ratingA = getProductReview(a.id)?.averageRating || 0;
-        const ratingB = getProductReview(b.id)?.averageRating || 0;
-        return ratingB - ratingA;
-      case "newest":
-        return b.id - a.id;
-      case "name":
-        return a.name.localeCompare(b.name);
-      default:
-        return 0;
+  const filteredProducts = useMemo(() => {
+    const normalizedCategory = selectedCategory?.trim().toLowerCase() || 'all';
+
+    return allProducts
+      .filter((product) => {
+        const nameMatches = searchQuery
+          ? String(product.name ?? '').toLowerCase().includes(searchQuery)
+          : true;
+        if (!nameMatches) return false;
+
+        if (!normalizedCategory || normalizedCategory === 'all') {
+          return true;
+        }
+
+        const productCategoryName = String(product.category ?? '').toLowerCase();
+        const categoryId = Number(normalizedCategory);
+        const categoryById = categories.find((c) => Number(c.id) === categoryId);
+
+        if (!Number.isNaN(categoryId) && categoryId > 0) {
+          return Number(product.categoryId) === categoryId || productCategoryName === categoryById?.name?.toLowerCase();
+        }
+
+        return productCategoryName === normalizedCategory;
+      })
+      .sort((a, b) => {
+        switch (sortType) {
+          case 'price-low':
+            return Number(a.finalPrice ?? 0) - Number(b.finalPrice ?? 0);
+          case 'price-high':
+            return Number(b.finalPrice ?? 0) - Number(a.finalPrice ?? 0);
+          case 'rating':
+            const ratingA = getProductReview(a.id)?.averageRating || 0;
+            const ratingB = getProductReview(b.id)?.averageRating || 0;
+            return ratingB - ratingA;
+          case 'newest':
+            return Number(b.id ?? 0) - Number(a.id ?? 0);
+          case 'name':
+            return String(a.name ?? '').localeCompare(String(b.name ?? ''));
+          default:
+            return 0;
+        }
+      });
+  }, [allProducts, categories, selectedCategory, searchQuery, sortType]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.1
+      }
     }
-  });
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+    }
+  }
 
   return <>
     <main className=' my-5 bg-main-color '>
@@ -130,41 +180,56 @@ export default function Category() {
             <ProductCardSkeleton/>
           </div>
         ) : (
-        <div className="displayProducts flex-1 grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+        <motion.div 
+          className="displayProducts flex-1 grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6"
+          initial="hidden"
+          animate="visible"
+          variants={containerVariants}
+        >
           {
             filteredProducts.map((product, index) => {
               const review = getProductReview(product.id);
 
               return (
-                <div key={index} className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
-                
+                <motion.div 
+                  key={index} 
+                  className="group flex flex-col bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm"
+                  variants={itemVariants}
+                  whileHover={{ y: -8, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
                 >
 
                   {/* Image */}
                   <div className="relative overflow-hidden" onClick={() => handleProductClick(product.id)}>
 
-                    <img
+                    <motion.img
                       src={getPrimaryImage(product)}
                       alt={product.name}
-                      className="w-full h-60 md:h-64 lg:h-72 object-cover transition duration-500 group-hover:scale-110"
+                      className="w-full h-60 md:h-64 lg:h-72 object-cover"
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ duration: 0.4 }}
                     />
 
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
 
                     {/* Wishlist Icon */}
-                    <button
+                    <motion.button
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleWishlist(product.id);
                       }}
-                      className="absolute top-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all duration-300 hover:scale-110 cursor-pointer"
+                      className="absolute top-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-md cursor-pointer"
                       title="Add to Wishlist"
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      transition={{ duration: 0.15 }}
                     >
                       <Heart
                         size={18}
                         className={`transition-colors ${wishlistItems.some((item: any) => item.id === product.id) ? 'text-red-500 fill-red-500' : 'text-gray-600 hover:text-red-500'}`}
                       />
-                    </button>
+                    </motion.button>
 
                   </div>
 
@@ -224,7 +289,7 @@ export default function Category() {
                       />
                     </div>
                   </div>
-                </div>
+                </motion.div>
               );
             })
           }
@@ -237,7 +302,7 @@ export default function Category() {
           
           />
 
-        </div>
+        </motion.div>
         )
 
        }
@@ -245,7 +310,12 @@ export default function Category() {
         
        
        
-        <div className="layoutCategories w-full lg:w-[300px] lg:sticky lg:top-24 self-start bg-white rounded-2xl border border-gray-100 shadow-lg p-6">
+        <motion.div 
+          className="layoutCategories w-full lg:w-[300px] lg:sticky lg:top-24 self-start bg-white rounded-2xl border border-gray-100 shadow-lg p-6"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4 }}
+        >
 
           {/* Title */}
           <div className="border-b border-gray-200 pb-4 mb-5">
@@ -295,7 +365,7 @@ export default function Category() {
             </select>
           </div>
 
-        </div>
+        </motion.div>
       </section>
     </main>
   </>

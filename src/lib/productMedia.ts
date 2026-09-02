@@ -1,4 +1,5 @@
 import { BASE_URL } from '../api/axios';
+import type { ProductVideo } from '../interface/productI';
 
 export interface ProductImageDto {
   id?: number;
@@ -18,9 +19,10 @@ export interface ProductMedia {
   originalPrice: number;
   discountPercentage: number | null;
   finalPrice: number;
+  offerStartDate?: string | null;
   offerEndDate: string | null;
   mainVideo: string | null;
-  videos: string[];
+  videos: Array<string | ProductVideo>;
   mainImage: string | null;
   images: ProductImageInput[];
 }
@@ -141,7 +143,8 @@ export function buildProductMediaList(product?: Partial<ProductMedia> | null): M
 
   if (Array.isArray(product.videos)) {
     product.videos.forEach((vid, idx) => {
-      if (vid) addVideo(vid, false, idx);
+      const videoUrl = typeof vid === 'string' ? vid : vid.videoUrl;
+      if (videoUrl) addVideo(videoUrl, false, idx);
     });
   }
 

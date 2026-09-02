@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { getCart, getProductById, getWishlist, removeFromCart, updateCartItem } from '../api/axios'
+import { getProducts, logout as logoutApi } from '../api/axios'
+import { useAuth } from '../features/context/tokenContext'
+import { useCart } from '../Context/CartContext'
+import { useWishlist } from '../Context/WishlistContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search,
@@ -19,7 +22,6 @@ import {
   LogOut,
   Settings,
   ClipboardList,
-  Bell,
   Trash2,
   Plus,
   Minus,
@@ -57,38 +59,8 @@ const POPULAR_SEARCHES = [
   'Ergonomic Chair',
 ]
 
-const SEARCH_SUGGESTIONS = [
-  {
-    id: 1,
-    title: 'Sony WH-1000XM5 Wireless Headphones',
-    price: 349.99,
-    originalPrice: 399.99,
-    image: 'https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=80&h=80&q=80',
-    category: 'Electronics',
-  },
-  {
-    id: 2,
-    title: 'Nike Air Max Running Shoes',
-    price: 129.99,
-    originalPrice: 159.99,
-    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=80&h=80&q=80',
-    category: 'Fashion',
-  },
-  {
-    id: 3,
-    title: 'Minimalist Leather Cardholder',
-    price: 39.99,
-    image: 'https://images.unsplash.com/photo-1627124118304-4b4716a04f3d?auto=format&fit=crop&w=80&h=80&q=80',
-    category: 'Fashion',
-  },
-]
 
-interface CartItem {
-  id: number
-  productId: number
-  quantity: number
-  product: Product
-}
+
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -100,21 +72,47 @@ export default function Navbar() {
   const [selectedCategory, setSelectedCategory] = useState('All Categories')
   const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false)
   const [showCategoryBarDropdown, setShowCategoryBarDropdown] = useState(false)
+ const [searchSuggestions, setSearchSuggestions] = useState<Product[]>([]);
+const [isSearching, setIsSearching] = useState(false);
 
+  const { isAuthenticated, logout } = useAuth();
+  const { cartItems, cartCount, updateQuantity: ctxUpdateQty, removeFromCart: ctxRemoveFromCart } = useCart();
+  const { wishlistCount } = useWishlist();
   // Language & Currency Dropdowns
   const [langOpen, setLangOpen] = useState(false)
   const [currOpen, setCurrOpen] = useState(false)
   const [lang, setLang] = useState('English')
   const [currency, setCurrency] = useState('USD')
 
+
+ const navItems = [
+    { label: "Home", to: "/", protected: false },
+    { label: "Categories", to: "/category", protected: false },
+    { label: "Dashboard", to: "/dashboard", protected: true },
+    { label: "Cart", to: "/cart", protected: true },
+    { label: "Deals", to: "/deals", protected: false },
+    { label: "Orders", to: "/orders", protected: true },
+  ];
+
+  const handleProtectedNavigation = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    to: string,
+    protectedRoute: boolean
+  ) => {
+    if (protectedRoute && !isAuthenticated) {
+      e.preventDefault();
+      navigate("/login");
+    }
+  };
+
+
+
   // User Dropdown
   const [accountOpen, setAccountOpen] = useState(false)
 
-  // Cart & Wishlist Drawer
+  // Cart Drawer
   const [cartOpen, setCartOpen] = useState(false)
-  const [wishlistCount, setWishlistCount] = useState(0)
   const [updatingItemId, setUpdatingItemId] = useState<number | null>(null)
-  const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [checkoutModalOpen, setCheckoutModalOpen] = useState(false)
 
   // Promo message carousel index
@@ -130,88 +128,6 @@ export default function Navbar() {
   // Carousel timer
   const { isBouncing } = useCartAnimation()
 
-  function getCartItemsPayload(data: any): any[] {
-    if (Array.isArray(data)) return data
-    if (Array.isArray(data?.items)) return data.items
-    if (Array.isArray(data?.cartItems)) return data.cartItems
-    if (Array.isArray(data?.data?.items)) return data.data.items
-    if (Array.isArray(data?.data?.cartItems)) return data.data.cartItems
-    return []
-  }
-
-  function getCartItemId(item: any): number | null {
-    const candidates = [
-      item?.id,
-      item?.cartItemId,
-      item?.cartItem?.id,
-      item?.cartItem?.cartItemId,
-      item?.item?.id,
-      item?.item?.cartItemId,
-    ]
-
-    const matched = candidates.find((value) => typeof value === 'number' && Number.isFinite(value))
-    return matched != null ? Number(matched) : null
-  }
-
-  function getCartItemProductId(item: any): number | null {
-    const candidates = [
-      item?.productId,
-      item?.product?.id,
-      item?.product?.productId,
-      item?.item?.productId,
-      item?.item?.product?.id,
-    ]
-
-    const matched = candidates.find((value) => typeof value === 'number' && Number.isFinite(value))
-    return matched != null ? Number(matched) : null
-  }
-
-  function getCartItemQuantity(item: any): number {
-    return Number(item?.quantity ?? item?.qty ?? item?.cartItem?.quantity ?? 1) || 1
-  }
-
-  const refreshCartData = async () => {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      setCartItems([])
-      setWishlistCount(0)
-      return
-    }
-
-    try {
-      const [cartRes, wishlistRes] = await Promise.all([
-        getCart(),
-        getWishlist(),
-      ])
-
-      const cartItemsPayload = getCartItemsPayload(cartRes)
-      const fullCart = await Promise.all(
-        cartItemsPayload.map(async (item: any) => {
-          const cartItemId = getCartItemId(item)
-          const productId = getCartItemProductId(item)
-
-          if (!cartItemId || !productId) return null
-
-          const product = await getProductById(productId)
-
-          return {
-            id: cartItemId,
-            productId,
-            quantity: getCartItemQuantity(item),
-            product,
-          }
-        })
-      )
-
-      setCartItems(fullCart.filter(Boolean) as CartItem[])
-      setWishlistCount(Array.isArray(wishlistRes) ? wishlistRes.length : 0)
-    } catch (error) {
-      console.error('Failed to fetch navbar cart data', error)
-      setCartItems([])
-      setWishlistCount(0)
-    }
-  }
-
   useEffect(() => {
     const timer = setInterval(() => {
       setPromoIndex((prev) => (prev + 1) % PROMO_MESSAGES.length)
@@ -219,21 +135,6 @@ export default function Navbar() {
     return () => clearInterval(timer)
   }, [])
 
-  useEffect(() => {
-    refreshCartData()
-
-    const handleCartUpdated = () => {
-      refreshCartData()
-    }
-
-    window.addEventListener('cartUpdated', handleCartUpdated)
-    window.addEventListener('wishlistUpdated', handleCartUpdated)
-
-    return () => {
-      window.removeEventListener('cartUpdated', handleCartUpdated)
-      window.removeEventListener('wishlistUpdated', handleCartUpdated)
-    }
-  }, [])
 
   // Close modals on click outside
   useEffect(() => {
@@ -273,7 +174,7 @@ export default function Navbar() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Cart operations
+  // Cart operations (via CartContext)
   const updateQty = async (id: number, delta: number) => {
     const targetItem = cartItems.find((item) => item.id === id)
     if (!targetItem) return
@@ -282,13 +183,9 @@ export default function Navbar() {
     setUpdatingItemId(id)
 
     try {
-      await updateCartItem(targetItem.id, { quantity: nextQty })
-      setCartItems(prev =>
-        prev.map((item) => (item.id === id ? { ...item, quantity: nextQty } : item))
-      )
-      await refreshCartData()
+      await ctxUpdateQty(id, nextQty)
     } catch (error) {
-      console.error('Failed to update navbar cart quantity', error)
+      console.error('Failed to update cart quantity', error)
     } finally {
       setUpdatingItemId(null)
     }
@@ -299,30 +196,82 @@ export default function Navbar() {
     if (!targetItem) return
 
     try {
-      await removeFromCart(targetItem.productId)
-      setCartItems(prev => prev.filter((item) => item.id !== id))
-      await refreshCartData()
+      await ctxRemoveFromCart(id, targetItem.productId)
     } catch (error) {
-      console.error('Failed to remove navbar cart item', error)
+      console.error('Failed to remove cart item', error)
     }
   }
 
   const cartTotal = cartItems.reduce((acc, item) => acc + Number(item.product.finalPrice ?? 0) * item.quantity, 0)
-  const totalItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0)
-  const subtotal = cartItems.reduce((acc, item) => acc + Number(item.product.finalPrice ?? 0) * item.quantity, 0)
+  const totalItemCount = cartCount
+  const subtotal = cartTotal
   const savings = cartItems.reduce(
     (acc, item) => acc + (Number(item.product.originalPrice ?? 0) - Number(item.product.finalPrice ?? 0)) * item.quantity,
     0
   )
-  const shipping = subtotal > 50 ? 'FREE' : 'FREE'
+  const shipping = 'FREE';
+  // Search with debounce
+  useEffect(() => {
+    const query = searchQuery.trim().toLowerCase();
+    let cancelled = false;
+    const delay = query ? 350 : 0;
+
+    const timer = setTimeout(async () => {
+      if (!query) {
+        if (!cancelled) {
+          setSearchSuggestions([]);
+          setIsSearching(false);
+        }
+        return;
+      }
+
+      try {
+        if (!cancelled) setIsSearching(true);
+
+        const response = await getProducts();
+        const products = response.products || [];
+
+        const filteredProducts = products
+          .filter((product) => {
+            const name = product.name?.toLowerCase() || '';
+            const category = product.category?.toLowerCase() || '';
+            const description = product.description?.toLowerCase() || '';
+
+            const matchesSearch =
+              name.includes(query) ||
+              category.includes(query) ||
+              description.includes(query);
+
+            const matchesCategory =
+              selectedCategory === 'All Categories' ||
+              category === selectedCategory.toLowerCase();
+
+            return matchesSearch && matchesCategory;
+          })
+          .slice(0, 5);
+
+        if (!cancelled) setSearchSuggestions(filteredProducts);
+      } catch (error) {
+        console.error('Search failed:', error);
+        if (!cancelled) setSearchSuggestions([]);
+      } finally {
+        if (!cancelled) setIsSearching(false);
+      }
+    }, delay);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [searchQuery, selectedCategory]);
 
   return (
     <header className="w-full fixed top-0 left-0 z-50 bg-white border-b border-gray-100 shadow-xs">
-      
+
       {/* 1. TOP ANNOUNCEMENT & UTILITIES BAR */}
       <div className="w-full bg-brand text-green-100 text-xs py-2 px-4 sm:px-6 lg:px-8 border-b border-brand-light">
         <div className="max-w-screen-xl mx-auto flex items-center justify-between">
-          
+
           {/* Promo Slider */}
           <div className="flex items-center space-x-2 overflow-hidden h-5">
             <AnimatePresence mode="wait">
@@ -419,7 +368,7 @@ export default function Navbar() {
       {/* 2. MAIN HEADER BAR */}
       <div className="w-full bg-white px-4 sm:px-6 lg:px-8 py-3.5 sm:py-4">
         <div className="max-w-screen-xl mx-auto flex items-center justify-between gap-4 md:gap-8">
-          
+
           {/* Logo & Mobile Menu Burger Button */}
           <div className="flex items-center gap-3">
             <button
@@ -443,7 +392,7 @@ export default function Navbar() {
           {/* Search bar container with dropdown selector & suggestions (Hidden on mobile) */}
           <div className="hidden md:flex flex-1 max-w-xl relative" ref={searchContainerRef}>
             <div className="flex w-full items-center bg-slate-50 hover:bg-slate-100/70 border border-slate-200 focus-within:border-brand focus-within:ring-3 focus-within:ring-brand/20 rounded-xl overflow-hidden transition-all duration-200">
-              
+
               {/* Category Select Inside Search Bar */}
               <div className="relative border-r border-slate-200 shrink-0" ref={categorySelectorRef}>
                 <button
@@ -454,7 +403,7 @@ export default function Navbar() {
                   <span className="truncate max-w-[110px]">{selectedCategory}</span>
                   <ChevronDown className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 </button>
-                
+
                 <AnimatePresence>
                   {isCategoryDropdownOpen && (
                     <motion.div
@@ -486,6 +435,19 @@ export default function Navbar() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setSearchFocused(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault()
+                      const query = searchQuery.trim()
+                      if (!query) {
+                        navigate('/category')
+                      } else {
+                        const categoryParam = selectedCategory !== 'All Categories' ? `&category=${encodeURIComponent(selectedCategory)}` : ''
+                        navigate(`/category?search=${encodeURIComponent(query)}${categoryParam}`)
+                      }
+                      setSearchFocused(false)
+                    }
+                  }}
                   className="w-full px-4 py-2.5 text-sm text-slate-900 bg-transparent placeholder-slate-400 border-0 focus:ring-0 focus:outline-none"
                 />
                 {searchQuery && (
@@ -500,7 +462,17 @@ export default function Navbar() {
 
               {/* Search Icon Button */}
               <button
-                type="submit"
+                type="button"
+                onClick={() => {
+                  const query = searchQuery.trim()
+                  if (!query) {
+                    navigate('/category')
+                  } else {
+                    const categoryParam = selectedCategory !== 'All Categories' ? `&category=${encodeURIComponent(selectedCategory)}` : ''
+                    navigate(`/category?search=${encodeURIComponent(query)}${categoryParam}`)
+                  }
+                  setSearchFocused(false)
+                }}
                 className="bg-brand hover:bg-brand-light transition-colors p-3 text-white rounded-r-xl cursor-pointer"
                 aria-label="Search"
               >
@@ -535,37 +507,89 @@ export default function Navbar() {
 
                   {/* Suggested Products */}
                   <div className="border-t border-slate-100 pt-3">
-                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Suggested Products</h4>
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+  {searchQuery.trim() ? 'Search Results' : 'Suggested Products'}
+</h4>
                     <div className="space-y-2.5">
-                      {SEARCH_SUGGESTIONS.map((item) => (
-                        <a
-                          key={item.id}
-                          href={`#product-${item.id}`}
-                          className="flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50/80 transition-colors group"
-                        >
-                          <img
-                            src={item.image}
-                            alt={item.title}
-                            className="w-10 h-10 object-cover rounded-md border border-slate-100"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold text-slate-800 truncate group-hover:text-brand transition-colors">
-                              {item.title}
-                            </p>
-                            <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
-                              {item.category}
-                            </span>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <span className="text-xs font-bold text-slate-900">${item.price}</span>
-                            {item.originalPrice && (
-                              <p className="text-[10px] text-slate-400 line-through font-medium">
-                                ${item.originalPrice}
-                              </p>
-                            )}
-                          </div>
-                        </a>
-                      ))}
+                      {isSearching ? (
+  <div className="space-y-3">
+    {[1, 2, 3].map((item) => (
+      <div
+        key={item}
+        className="flex items-center gap-3 p-2 animate-pulse"
+      >
+        <div className="w-10 h-10 rounded-md bg-slate-200" />
+
+        <div className="flex-1 space-y-2">
+          <div className="h-2.5 w-3/4 rounded bg-slate-200" />
+          <div className="h-2 w-1/3 rounded bg-slate-100" />
+        </div>
+
+        <div className="h-3 w-12 rounded bg-slate-200" />
+      </div>
+    ))}
+  </div>
+) : searchSuggestions.length > 0 ? (
+  <div className="space-y-2.5">
+    {searchSuggestions.map((item) => (
+      <button
+        key={item.id}
+        type="button"
+        onClick={() => {
+          setSearchFocused(false);
+          setSearchQuery('');
+          navigate(`/product/${item.id}`);
+        }}
+        className="w-full flex items-center gap-3 p-1.5 rounded-lg hover:bg-slate-50 transition-colors group text-left"
+      >
+        <img
+          src={
+            item.mainImage ||
+            item.images?.find((img) => img.isMain)?.imageUrl ||
+            item.images?.[0]?.imageUrl ||
+            '/placeholder-product.png'
+          }
+          alt={item.name}
+          className="w-10 h-10 object-cover rounded-md border border-slate-100"
+        />
+
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-semibold text-slate-800 truncate group-hover:text-brand transition-colors">
+            {item.name}
+          </p>
+
+          <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+            {item.category}
+          </span>
+        </div>
+
+        <div className="text-right shrink-0">
+          <span className="text-xs font-bold text-slate-900">
+            ${Number(item.finalPrice ?? item.originalPrice).toFixed(2)}
+          </span>
+
+          {item.discountPercentage && item.discountPercentage > 0 && (
+            <p className="text-[10px] text-slate-400 line-through">
+              ${Number(item.originalPrice).toFixed(2)}
+            </p>
+          )}
+        </div>
+      </button>
+    ))}
+  </div>
+) : (
+  <div className="py-6 text-center">
+    <Search className="w-6 h-6 mx-auto text-slate-300 mb-2" />
+
+    <p className="text-xs font-semibold text-slate-500">
+      No products found
+    </p>
+
+    <p className="text-[10px] text-slate-400 mt-1">
+      Try another search
+    </p>
+  </div>
+)}
                     </div>
                   </div>
 
@@ -585,7 +609,7 @@ export default function Navbar() {
 
           {/* User actions: compare, wishlist, cart, account */}
           <div className="flex items-center space-x-1.5 sm:space-x-3.5">
-            
+
             {/* Compare (Hidden on mobile) */}
             <button
               className="hidden lg:flex items-center justify-center p-2 text-slate-700 hover:text-brand hover:bg-brand/10 rounded-xl transition-colors cursor-pointer relative"
@@ -599,7 +623,7 @@ export default function Navbar() {
 
             {/* Wishlist */}
             <button
-              onClick={() => navigate('/wishlist')}
+              onClick={isAuthenticated ? () => navigate('/wishlist'):() => navigate('/login')}
               className="flex items-center justify-center p-2 text-slate-700 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors cursor-pointer relative group"
               aria-label="Wishlist"
             >
@@ -614,7 +638,7 @@ export default function Navbar() {
             {/* Cart Button with mini total */}
             <button
               id="navbar-cart-btn"
-              onClick={() => { setCartOpen(!cartOpen); setAccountOpen(false); setMenuOpen(false); }}
+              onClick={isAuthenticated ? () => {setCartOpen(!cartOpen); setAccountOpen(false); setMenuOpen(false); }:() => navigate('/login')}
               className="flex items-center space-x-2.5 p-2 md:pl-2.5 md:pr-3.5 text-slate-700 hover:text-brand hover:bg-brand/10 rounded-xl transition-all duration-200 cursor-pointer relative"
               aria-label="Shopping Cart"
               data-cart-target="true"
@@ -659,21 +683,21 @@ export default function Navbar() {
               >
                 <div className="w-8 h-8 rounded-full bg-brand/10 border border-brand/20 flex items-center justify-center text-brand font-bold overflow-hidden shadow-xs">
                   <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80"
-                    alt="User Profile"
+                    src="/default-avatar.svg"
+                    alt="User Avatar"
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      // Fallback if image fails to load
-                      (e.target as HTMLElement).style.display = 'none';
+                      (e.target as HTMLImageElement).style.display = 'none';
                     }}
                   />
-                  {/* Fallback Icon if image fails */}
                   <User className="w-4 h-4 absolute" />
                 </div>
                 <div className="hidden lg:flex flex-col text-left text-xs">
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase leading-none">Welcome</span>
+                  <span className="text-[10px] text-slate-400 font-semibold uppercase leading-none">
+                    {isAuthenticated ? 'مرحبا بك' : 'مرحبا'}
+                  </span>
                   <span className="font-bold text-slate-800 flex items-center mt-0.5">
-                    Alex R. <ChevronDown className="w-3 h-3 ml-1 text-slate-400" />
+                    {isAuthenticated ? 'حسابي' : 'تسجيل دخول'} <ChevronDown className="w-3 h-3 ml-1 text-slate-400" />
                   </span>
                 </div>
               </button>
@@ -687,43 +711,70 @@ export default function Navbar() {
                     className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-100 py-2.5 z-50 overflow-hidden"
                   >
                     {/* User Info Header */}
-                    <div className="px-4 py-2 border-b border-slate-100">
-                      <p className="text-sm font-bold text-slate-900">Alex Rodriguez</p>
-                      <p className="text-xs text-slate-400 truncate">alex.rodriguez@example.com</p>
-                    </div>
+                    {isAuthenticated ? (
+                      <>
+                        <div className="px-4 py-2 border-b border-slate-100">
+                          <p className="text-sm font-bold text-slate-900">MyStore Customer</p>
+                          <p className="text-xs text-slate-400 truncate">Logged in</p>
+                        </div>
 
-                    <div className="p-1">
-                      <a href="#profile" className="flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-brand/10 hover:text-brand rounded-lg transition-colors">
-                        <User className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span>My Profile</span>
-                      </a>
-                      <Link
-                        to="/orders"
-                        onClick={() => setAccountOpen(false)}
-                        className="flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-brand/10 hover:text-brand rounded-lg transition-colors"
-                      >
-                        <ClipboardList className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span>My Orders</span>
-                      </Link>
-                      <a href="#notifications" className="flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-brand/10 hover:text-brand rounded-lg transition-colors">
-                        <Bell className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span>Notifications</span>
-                      </a>
-                      <a href="#settings" className="flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-brand/10 hover:text-brand rounded-lg transition-colors">
-                        <Settings className="w-4 h-4 text-slate-400 shrink-0" />
-                        <span>Settings</span>
-                      </a>
-                    </div>
+                        <div className="p-1">
+                          <Link
+                            to="/orders"
+                            onClick={() => setAccountOpen(false)}
+                            className="flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-brand/10 hover:text-brand rounded-lg transition-colors"
+                          >
+                            <ClipboardList className="w-4 h-4 text-slate-400 shrink-0" />
+                            <span>My Orders</span>
+                          </Link>
+                          <Link
+                            to="/profile"
+                            onClick={() => setAccountOpen(false)}
+                            className="flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-brand/10 hover:text-brand rounded-lg transition-colors"
+                          >
+                            <User className="w-4 h-4 text-slate-400 shrink-0" />
+                            <span>My Profile</span>
+                          </Link>
+                        </div>
 
-                    <div className="border-t border-slate-100 mt-1.5 pt-1.5 px-1">
-                      <button
-                        onClick={() => setAccountOpen(false)}
-                        className="w-full flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors text-left cursor-pointer"
-                      >
-                        <LogOut className="w-4 h-4 shrink-0" />
-                        <span>Sign Out</span>
-                      </button>
-                    </div>
+                        <div className="border-t border-slate-100 mt-1.5 pt-1.5 px-1">
+                          <button
+                            onClick={async () => {
+                              try {
+                                await logoutApi();
+                              } catch (error) {
+                                console.error('Logout API failed:', error);
+                              }
+                              logout();
+                              setAccountOpen(false);
+                            }}
+                            className="w-full flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-lg transition-colors text-left cursor-pointer"
+                          >
+                            <LogOut className="w-4 h-4 shrink-0" />
+                            <span>Logout</span>
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="p-1">
+                        <Link
+                          to="/login"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-brand/10 hover:text-brand rounded-lg transition-colors"
+                        >
+                          <User className="w-4 h-4 text-slate-400 shrink-0" />
+                          <span>Login</span>
+                        </Link>
+                        <Link
+                          to="/register"
+                          onClick={() => setAccountOpen(false)}
+                          className="flex items-center space-x-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-brand/10 hover:text-brand rounded-lg transition-colors"
+                        >
+                          <Settings className="w-4 h-4 text-slate-400 shrink-0" />
+                          <span>Create Account</span>
+                        </Link>
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -736,9 +787,9 @@ export default function Navbar() {
       {/* 3. CATEGORIES & MAIN LINKS BAR (Hidden on mobile) */}
       <div className="hidden md:block w-full border-t border-gray-100 bg-slate-50 px-4 sm:px-6 lg:px-8 py-2.5">
         <div className="max-w-screen-xl mx-auto flex items-center justify-between">
-          
+
           <div className="flex items-center space-x-8">
-            
+
             {/* All Categories Dropdown Trigger */}
             <div className="relative">
               <button
@@ -750,7 +801,7 @@ export default function Navbar() {
                 <span>Shop By Category</span>
                 <ChevronDown className="w-3.5 h-3.5" />
               </button>
-              
+
               <AnimatePresence>
                 {showCategoryBarDropdown && (
                   <motion.div
@@ -777,32 +828,27 @@ export default function Navbar() {
             </div>
 
             {/* Nav Links */}
-            <nav className="flex items-center space-x-6">
-              {[
-                { label: 'Home', to: '/' },
-                { label: 'Categories', to: '/category' },
-                { label: 'Dashboard', to: '/dashboard' },
-                { label: 'Cart', to: '/cart' },
-                { label: 'Deals', to: '/deals' },
-                { label: 'Orders', to: '/orders' },
-                // { label: 'New Arrivals', to: '/new-arrivals' },
-              ].map(({ label, to }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  end
-                  className={({ isActive }) =>
-                    `text-xs font-bold transition-colors py-1 ${
-                      isActive
-                        ? 'text-brand border-b-2 border-brand'
-                        : 'text-slate-600 hover:text-brand'
-                    }`
-                  }
-                >
-                  {label}
-                </NavLink>
-              ))}
-            </nav>
+           <nav className="flex items-center space-x-6">
+      {navItems.map(({ label, to, protected: isProtected }) => (
+        <NavLink
+          key={to}
+          to={to}
+          end
+          onClick={(e) =>
+            handleProtectedNavigation(e, to, isProtected)
+          }
+          className={({ isActive }) =>
+            `text-xs font-bold transition-colors py-1 ${
+              isActive
+                ? "text-brand border-b-2 border-brand"
+                : "text-slate-600 hover:text-brand"
+            }`
+          }
+        >
+          {label}
+        </NavLink>
+      ))}
+    </nav>
           </div>
 
           {/* Delivery banner & Hotline */}
@@ -888,7 +934,7 @@ export default function Navbar() {
                           className="w-20 h-20 object-cover rounded-lg border border-slate-200"
                         />
                       </Link>
-                      
+
                       <div className="flex-1 min-w-0 flex flex-col justify-between">
                         <div>
                           <Link to={`/product/${item.product.id}`} className="text-xs font-bold text-slate-900 line-clamp-2 leading-tight hover:text-brand transition-colors">
@@ -912,7 +958,7 @@ export default function Navbar() {
                               </span>
                             )}
                           </div>
-                          
+
                           {/* Quantity control */}
                           <div className="flex items-center border border-slate-200 rounded-lg bg-white overflow-hidden">
                             <button
@@ -954,7 +1000,7 @@ export default function Navbar() {
               {/* Drawer Footer (Subtotal & Actions) */}
               {cartItems.length > 0 && (
                 <div className="p-4 border-t border-slate-100 bg-slate-50 space-y-4">
-                  
+
                   {/* Shipping Guarantee Ticker */}
                   <div className="flex items-center space-x-2 text-[11px] font-semibold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg p-2.5">
                     <Truck className="w-4 h-4 text-emerald-500 shrink-0" />
@@ -1098,10 +1144,9 @@ export default function Navbar() {
                         to={to}
                         onClick={() => setMenuOpen(false)}
                         className={({ isActive }) =>
-                          `flex items-center justify-between px-3 py-2.5 text-xs font-bold rounded-lg transition-colors ${
-                            isActive
-                              ? 'bg-brand/10 text-brand'
-                              : 'text-slate-700 hover:bg-slate-50'
+                          `flex items-center justify-between px-3 py-2.5 text-xs font-bold rounded-lg transition-colors ${isActive
+                            ? 'bg-brand/10 text-brand'
+                            : 'text-slate-700 hover:bg-slate-50'
                           }`
                         }
                       >

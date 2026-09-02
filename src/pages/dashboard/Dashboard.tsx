@@ -15,6 +15,7 @@ import { getProducts, createProduct, updateProduct as apiUpdateProduct, deletePr
 import { getUsers, updateUser as apiUpdateUser, deleteUser as apiDeleteUser } from '../../api/axios';
 import { getPrimaryImage, type ProductMedia } from '../../lib/productMedia';
 import { getOrders, updateOrderStatus, cancelOrder } from '../../api/axios';
+import { motion } from 'framer-motion';
 
 interface Category {
   id: number;
@@ -234,7 +235,7 @@ const Dashboard = () => {
       if (!editingProduct && !productId) {
         try {
           const res = await getProducts();
-          const all = normalizeArray<any>(res?.data ?? res);
+          const all = normalizeArray<any>(res);
           const match = all.find((p: any) => p.name === productForm.name.trim());
           productId = match?.id;
         } catch (_) { /* ignore */ }
@@ -431,7 +432,9 @@ const Dashboard = () => {
         stockQuantity: String(productData.stockQuantity ?? ''),
         mainImage: productData.mainImage ?? '',
         mainVideo: productData.mainVideo ?? '',
-        videos: Array.isArray(productData.videos) ? productData.videos : [],
+        videos: Array.isArray(productData.videos)
+          ? productData.videos.map((video: any) => (typeof video === 'string' ? video : video.videoUrl ?? ''))
+          : [],
         images: Array.isArray(productData.images) ? productData.images : [],
         category: productData.category ?? '',
         discountPercentage: String(productData.discountPercentage ?? ''),
@@ -449,7 +452,9 @@ const Dashboard = () => {
         stockQuantity: String(prod.stockQuantity ?? ''),
         mainImage: prod.mainImage ?? '',
         mainVideo: prod.mainVideo ?? '',
-        videos: Array.isArray(prod.videos) ? prod.videos : [],
+        videos: Array.isArray(prod.videos)
+          ? prod.videos.map((video: any) => (typeof video === 'string' ? video : video.videoUrl ?? ''))
+          : [],
         images: Array.isArray(prod.images) ? prod.images : [],
         category: prod.category ?? '',
         discountPercentage: String(prod.discountPercentage ?? ''),
@@ -701,6 +706,24 @@ const Dashboard = () => {
     { label: 'Users', value: users.length, icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z', color: 'bg-amber-100 text-amber-700' },
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  }
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+    }
+  }
+
   const filteredCategories = categories.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
   const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
   const filteredQuestions = questions.filter(q => q.question.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -736,24 +759,47 @@ const Dashboard = () => {
             <>
           {/* Dashboard Section */}
           {activeSection === 'dashboard' && (
-            <div className="space-y-6">
-              <div>
+            <motion.div 
+              className="space-y-6"
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+            >
+              <motion.div variants={itemVariants}>
                 <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
                 <p className="text-gray-500 mt-1">Welcome back! Here's what's happening today.</p>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              </motion.div>
+              <motion.div 
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+                variants={containerVariants}
+              >
                 {stats.map((stat, i) => (
-                  <StatsCard key={i} label={stat.label} value={stat.value} icon={stat.icon} color={stat.color} />
+                  <motion.div key={i} variants={itemVariants}>
+                    <StatsCard label={stat.label} value={stat.value} icon={stat.icon} color={stat.color} index={i} />
+                  </motion.div>
                 ))}
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+              </motion.div>
+              <motion.div 
+                className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                variants={containerVariants}
+              >
+                <motion.div 
+                  className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+                  variants={itemVariants}
+                >
                   <h3 className="text-lg font-bold text-gray-800 mb-4">Recent Products</h3>
                   <div className="space-y-3">
-                    {products.slice(0, 5).map(product => {
+                    {products.slice(0, 5).map((product, index) => {
                       const stock = getStock(product);
                       return (
-                        <div key={product.id} className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors">
+                        <motion.div 
+                          key={product.id} 
+                          className="flex items-center gap-4 p-3 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer"
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          whileHover={{ x: 4 }}
+                        >
                           <img src={getPrimaryImage(product)} alt={product.name} className="w-12 h-12 rounded-lg object-cover" />
                           <div className="flex-1">
                             <div className="font-semibold text-gray-800 text-sm">{product.name}</div>
@@ -763,33 +809,46 @@ const Dashboard = () => {
                             <div className="font-bold text-[#00342B]">${product.finalPrice}</div>
                             <div className={`text-xs ${stock < 20 ? 'text-red-500' : 'text-emerald-600'}`}>{stock} in stock</div>
                           </div>
-                        </div>
+                        </motion.div>
                       );
                     })}
                   </div>
-                </div>
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                </motion.div>
+                <motion.div 
+                  className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+                  variants={itemVariants}
+                >
                   <h3 className="text-lg font-bold text-gray-800 mb-4">Category Distribution</h3>
                   <div className="space-y-4">
-                    {categories.map(cat => {
+                    {categories.map((cat, index) => {
                       const count = products.filter(p => p.category === cat.name).length;
                       const percentage = products.length > 0 ? (count / products.length) * 100 : 0;
                       return (
-                        <div key={cat.id}>
+                        <motion.div 
+                          key={cat.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                        >
                           <div className="flex justify-between text-sm mb-1">
                             <span className="font-medium text-gray-700">{cat.name}</span>
                             <span className="text-gray-500">{count} products</span>
                           </div>
                           <div className="w-full bg-gray-100 rounded-full h-2.5">
-                            <div className="bg-[#00342B] h-2.5 rounded-full transition-all duration-500" style={{ width: `${percentage}%` }}></div>
+                            <motion.div 
+                              className="bg-[#00342B] h-2.5 rounded-full"
+                              initial={{ width: 0 }}
+                              animate={{ width: `${percentage}%` }}
+                              transition={{ duration: 0.8, delay: index * 0.1 }}
+                            ></motion.div>
                           </div>
-                        </div>
+                        </motion.div>
                       );
                     })}
                   </div>
-                </div>
-              </div>
-            </div>
+                </motion.div>
+              </motion.div>
+            </motion.div>
           )}
 
           {/* Categories Section */}

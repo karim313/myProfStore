@@ -154,3 +154,144 @@ body {
     @apply font-sans;
   }
 }
+
+/* ============================================================
+   PREMIUM ANIMATION LAYER
+   ============================================================ */
+
+/* ── Custom Cursor ───────────────────────────────────────── */
+@media (pointer: fine) {
+  .custom-cursor {
+    position: fixed;
+    top: 0; left: 0;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #00342B;
+    pointer-events: none;
+    z-index: 999999;
+    transition: width 0.2s, height 0.2s, background 0.2s;
+    mix-blend-mode: multiply;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+  }
+
+  .custom-cursor-ring {
+    position: fixed;
+    top: 0; left: 0;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0,52,43,0.35);
+    pointer-events: none;
+    z-index: 999998;
+    transform: translate(-50%, -50%);
+    will-change: transform;
+    transition: width 0.25s ease, height 0.25s ease, border-color 0.25s ease;
+  }
+
+  body:has(a:hover, button:hover, [role="button"]:hover) .custom-cursor-ring {
+    width: 52px; height: 52px;
+    border-color: rgba(0,52,43,0.6);
+  }
+}
+
+/* ── 3D Card Tilt ────────────────────────────────────────── */
+.card-3d {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: box-shadow 0.3s ease;
+}
+
+.card-3d-inner {
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+/* ── Hero Float Image ────────────────────────────────────── */
+.hero-float-img {
+  animation: heroFloat 5s ease-in-out infinite;
+}
+
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%       { transform: translateY(-12px) rotate(0.5deg); }
+  66%       { transform: translateY(-6px) rotate(-0.3deg); }
+}
+
+/* ── Shimmer / Skeleton ──────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    #f0f0f0 25%,
+    #e0e0e0 50%,
+    #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+/* ── Glow pulse (cart badge etc.) ───────────────────────── */
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,52,43,0.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(0,52,43,0); }
+}
+
+.glow-pulse {
+  animation: glowPulse 1.2s ease-out;
+}
+
+/* ── Page transition wrapper ─────────────────────────────── */
+.page-transition-enter {
+  opacity: 0;
+  transform: scale(0.97) translateY(16px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  transition: opacity 0.45s cubic-bezier(0.22,1,0.36,1),
+              transform 0.45s cubic-bezier(0.22,1,0.36,1);
+}
+
+/* ── Magnetic button ─────────────────────────────────────── */
+.magnetic {
+  display: inline-flex;
+  will-change: transform;
+}
+
+/* ── Gradient moving background (Flash Sale) ─────────────── */
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animated-gradient {
+  background: linear-gradient(-45deg, #00342B, #005a4a, #1a3a5c, #2d1a00);
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+}
+
+/* ── Reduced Motion ──────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .hero-float-img { animation: none !important; }
+  .animated-gradient { animation: none !important; }
+  .shimmer { animation: none !important; }
+  .glow-pulse { animation: none !important; }
+  .card-3d { transform: none !important; }
+  .custom-cursor, .custom-cursor-ring { display: none !important; }
+}
+
+/* ── Number counter (stats) ──────────────────────────────── */
+.stat-number {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ── No scrollbar utility ────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

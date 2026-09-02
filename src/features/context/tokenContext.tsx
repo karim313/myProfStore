@@ -28,14 +28,14 @@ export function AuthProvider({
     if (storedToken) {
       setToken(storedToken);
       console.log(storedToken);
-      
+
     }
   }, []);
 
   const login = (token: string) => {
-  localStorage.setItem("token", token);
-  setToken(token);
-};
+    localStorage.setItem("token", token);
+    setToken(token);
+  };
 
   const logout = () => {
     localStorage.removeItem("token");

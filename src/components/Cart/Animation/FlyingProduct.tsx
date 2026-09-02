@@ -1,7 +1,6 @@
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { calculateBezierPath } from '../../../utils/cart-animation/calculateBezierPath';
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface FlyingProductProps {
   imageUrl: string;
@@ -24,54 +23,108 @@ export function FlyingProduct({
 
   useEffect(() => {
     setMounted(true);
+
+    return () => {
+      setMounted(false);
+    };
   }, []);
 
   if (!mounted) return null;
 
-  const path = calculateBezierPath(startX, startY, endX, endY);
+  /*
+   * Calculate the distance.
+   */
+  const deltaX = endX - startX;
+  const deltaY = endY - startY;
+
+  /*
+   * Control point.
+   *
+   * This creates a nice arc.
+   *
+   * The product goes:
+   *
+   * Start
+   *    ↗
+   *      ↗
+   *        → Cart
+   */
+
+  const controlX = startX + deltaX * 0.55;
+
+  const controlY =
+    Math.min(startY, endY) - 120;
 
   return createPortal(
     <motion.div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        pointerEvents: 'none',
-        zIndex: 9999,
-        // Center the image on the path point
-        x: '-50%',
-        y: '-50%',
+      initial={{
+        position: "fixed",
+        left: startX,
+        top: startY,
+        x: "-50%",
+        y: "-50%",
+        scale: 1,
+        opacity: 1,
       }}
-      initial={{ offsetDistance: '0%', scale: 1, opacity: 1, rotate: 0, filter: 'blur(0px)' }}
       animate={{
-        offsetDistance: '100%',
-        scale: 0.25,
-        opacity: 0.4,
-        rotate: 15,
-        filter: 'blur(2px)',
+        left: endX,
+        top: endY,
+        x: "-50%",
+        y: "-50%",
+        scale: 0.18,
+        opacity: 0,
       }}
       transition={{
-        duration: 0.7,
-        ease: [0.25, 1, 0.5, 1], // Custom smooth ease
+        duration: 0.75,
+        ease: [0.22, 1, 0.36, 1],
       }}
       onAnimationComplete={onComplete}
+      style={{
+        width: 60,
+        height: 60,
+        pointerEvents: "none",
+        zIndex: 999999,
+        position: "fixed",
+      }}
     >
       <motion.div
+        initial={{
+          x: 0,
+          y: 0,
+        }}
+        animate={{
+          x: [
+            0,
+            (controlX - startX) * 0.5,
+            deltaX,
+          ],
+          y: [
+            0,
+            controlY - startY,
+            deltaY,
+          ],
+        }}
+        transition={{
+          duration: 0.75,
+          ease: [0.22, 1, 0.36, 1],
+        }}
         style={{
-          offsetPath: `path('${path}')`,
-          width: '60px',
-          height: '60px',
+          width: 60,
+          height: 60,
         }}
       >
         <img
           src={imageUrl}
           alt=""
+          draggable={false}
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            borderRadius: '50%',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+            width: "60px",
+            height: "60px",
+            objectFit: "cover",
+            borderRadius: "50%",
+            boxShadow:
+              "0 12px 30px rgba(0,0,0,0.25)",
+            display: "block",
           }}
         />
       </motion.div>

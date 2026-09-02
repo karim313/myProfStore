@@ -34,6 +34,7 @@ export interface Product {
   discountPercentage: number | null;
   finalPrice: number;
 
+  offerStartDate?: string | null;
   offerEndDate: string | null;
 
   mainImage: string | null;

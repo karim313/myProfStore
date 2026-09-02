@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
   ShoppingCart,
@@ -23,6 +23,7 @@ import type { Product } from '@/interface';
 import ShippingAddressMap from '@/components/ShippingAddressMap/ShippingAddressMap';
 import type { LocationResult } from '@/components/ShippingAddressMap/ShippingAddressMap';
 import { useToast, ToastContainer } from '@/components/Toast/Toast';
+import { useMagneticHover } from '@/hooks/useMagneticHover';
 
 function getCartItemId(item: any): number | null {
   const candidates = [
@@ -76,6 +77,8 @@ export default function Cart() {
   const [showMap, setShowMap] = useState(false);
   const [shippingLocation, setShippingLocation] = useState<LocationResult | null>(null);
   const { toasts, toast, remove } = useToast();
+  
+  const magneticBtn = useMagneticHover<HTMLButtonElement>({ strength: 0.15 });
 
   async function getCartProducts() {
     try {
@@ -110,7 +113,7 @@ export default function Cart() {
     getCartProducts()
   }, [])
 
-    // Update quantity
+  // Update quantity
   async function handleUpdateQty(cartItemId: number, quantity: number) {
     if (!cartItemId || quantity < 1) return;
 
@@ -168,7 +171,7 @@ export default function Cart() {
         shippingAddress: shippingLocation.address
       };
       const orderResponse = await createOrder(orderData);
-      
+
       // Capture the orderId from response
       const orderId = orderResponse?.orderId || orderResponse?.id || orderResponse?.data?.orderId || orderResponse?.data?.id;
 
@@ -289,78 +292,119 @@ export default function Cart() {
             </div>
 
             {/* Cart Item - Example */}
-            {
-              cart.map((item, index) => (
-                <div className="cart-item" key={item.id ?? `${item.productId}-${index}`}>
-              {/* Image */}
-              <Link to={`/product/${item.product.id}`} className="cart-item__image-wrap">
-                <img src={item.product.mainImage || 'https://placehold.co/120?text=Product'} alt={item.product.name} className="cart-item__image" />
-                <span className="cart-item__badge">{item.product.discountPercentage}%</span>
-              </Link>
+            <AnimatePresence mode="popLayout">
+              {
+                cart.map((item, index) => (
+                  <motion.div
+                    className="cart-item"
+                    key={item.id ?? `${item.productId}-${index}`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 20, height: 0, marginBottom: 0 }}
+                    transition={{ duration: 0.3 }}
+                    layout
+                  >
+                    {/* Image */}
+                    <Link to={`/product/${item.product.id}`} className="cart-item__image-wrap">
+                      <motion.img
+                        src={item.product.mainImage || 'https://placehold.co/120?text=Product'}
+                        alt={item.product.name}
+                        className="cart-item__image"
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ duration: 0.2 }}
+                      />
+                      <span className="cart-item__badge">{item.product.discountPercentage}%</span>
+                    </Link>
 
-              {/* Info */}
-              <div className="cart-item__info">
-                <Link to={`/product/${item.product.id}`} className="cart-item__name">
-                  {item.product.name}
-                </Link>
-                <span className="cart-item__category">{item.product.category}</span>
-                <span className="cart-item__low-stock">
-                  Only {item.product.stockQuantity} left!
-                </span>
-              </div>
+                    {/* Info */}
+                    <div className="cart-item__info">
+                      <Link to={`/product/${item.product.id}`} className="cart-item__name">
+                        {item.product.name}
+                      </Link>
+                      <span className="cart-item__category">{item.product.category}</span>
+                      <span className="cart-item__low-stock">
+                        Only {item.product.stockQuantity} left!
+                      </span>
+                    </div>
 
-              {/* Price */}
-              <div className="cart-item__price-col">
-                <span className="cart-item__price">${item.product.finalPrice}</span>
-                {
-                  item.product.originalPrice != item.product.finalPrice ? (
-                    <span className="cart-item__original">${item.product.originalPrice}</span>
-                  ) : (
-                    null
-                  )
-                }
-              </div>
+                    {/* Price */}
+                    <div className="cart-item__price-col">
+                      <span className="cart-item__price">${item.product.finalPrice}</span>
+                      {
+                        item.product.originalPrice != item.product.finalPrice ? (
+                          <span className="cart-item__original">${item.product.originalPrice}</span>
+                        ) : (
+                          null
+                        )
+                      }
+                    </div>
 
-              {/* Qty stepper */}
-              <div className="cart-item__qty">
-                <button
-                  className="cart-qty-btn"
-                  disabled={updatingItemId === item.id || item.quantity <= 1}
-                  onClick={() => {
-                    if (item.quantity > 1) {
-                      handleUpdateQty(item.id, item.quantity - 1);
-                    }
-                  }}
-                >
-                  <Minus size={13} />
-                </button>
-                <span className="cart-qty-value">{item.quantity}</span>
-                <button
-                  className="cart-qty-btn"
-                  disabled={updatingItemId === item.id}
-                  onClick={() => {
-                    handleUpdateQty(item.id, item.quantity + 1);
-                  }}
-                >
-                  <Plus size={13} />
-                </button>
-              </div>
+                    {/* Qty stepper */}
+                    <div className="cart-item__qty">
+                      <motion.button
+                        className="cart-qty-btn"
+                        disabled={updatingItemId === item.id || item.quantity <= 1}
+                        onClick={() => {
+                          if (item.quantity > 1) {
+                            handleUpdateQty(item.id, item.quantity - 1);
+                          }
+                        }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ duration: 0.1 }}
+                      >
+                        <Minus size={13} />
+                      </motion.button>
+                      <motion.span
+                        className="cart-qty-value"
+                        key={item.quantity}
+                        initial={{ scale: 1.2 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {item.quantity}
+                      </motion.span>
+                      <motion.button
+                        className="cart-qty-btn"
+                        disabled={updatingItemId === item.id}
+                        onClick={() => {
+                          handleUpdateQty(item.id, item.quantity + 1);
+                        }}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        transition={{ duration: 0.1 }}
+                      >
+                        <Plus size={13} />
+                      </motion.button>
+                    </div>
 
-              {/* Item Total */}
-              <div className="cart-item__total">${(item.product.finalPrice * item.quantity).toFixed(2)}</div>
+                    {/* Item Total */}
+                    <motion.div
+                      className="cart-item__total"
+                      key={`total-${item.product.finalPrice * item.quantity}`}
+                      initial={{ scale: 1.1 }}
+                      animate={{ scale: 1 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      ${(item.product.finalPrice * item.quantity).toFixed(2)}
+                    </motion.div>
 
-              {/* Remove */}
-              <button
-                className="cart-item__remove"
-                aria-label="Remove item"
-                onClick={() => handleRemoveItem(item.id, item.productId)}
-              >
-                <X size={15} />
-              </button>
-            </div>
-              ))
-            }
-            
+                    {/* Remove */}
+                    <motion.button
+                      className="cart-item__remove"
+                      aria-label="Remove item"
+                      onClick={() => handleRemoveItem(item.id, item.productId)}
+                      whileHover={{ scale: 1.1, color: '#ef4444' }}
+                      whileTap={{ scale: 0.9 }}
+                      transition={{ duration: 0.1 }}
+                    >
+                      <X size={15} />
+                    </motion.button>
+                  </motion.div>
+                ))
+              }
+            </AnimatePresence>
+
 
             {/* Promo Badges */}
             <motion.div
@@ -407,8 +451,8 @@ export default function Cart() {
                   <span className="text-[#4b5563] line-clamp-2" title={shippingLocation.address}>
                     {shippingLocation.address}
                   </span>
-                  <button 
-                    onClick={() => setShowMap(true)} 
+                  <button
+                    onClick={() => setShowMap(true)}
                     className="text-[#00342B] hover:text-[#004d3e] font-bold text-left underline w-fit cursor-pointer"
                   >
                     Change Address
@@ -442,8 +486,11 @@ export default function Cart() {
               </div>
 
               {/* CTA */}
-              <button 
-                className="cart-btn cart-btn--primary cart-btn--checkout"
+              <button
+                ref={magneticBtn.ref}
+                onMouseMove={magneticBtn.onMouseMove}
+                onMouseLeave={magneticBtn.onMouseLeave}
+                className="cart-btn cart-btn--primary cart-btn--checkout magnetic"
                 onClick={handleCheckout}
                 disabled={isCheckingOut || cart.length === 0}
               >

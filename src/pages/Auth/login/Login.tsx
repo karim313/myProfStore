@@ -22,8 +22,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { FaUser } from "react-icons/fa"
 import { loginApi } from "@/api/Auth/authApi"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useLocation, type Location } from "react-router-dom"
 import { useAuth } from "@/features/context/tokenContext"
+import { motion } from "framer-motion"
 
 export const loginSchema = z.object({
   email: z.email("Please enter a valid email"),
@@ -50,13 +51,17 @@ console.log(isAuthenticated);
   },
 });
 const navigate = useNavigate();
+const location = useLocation();
 const onSubmit = async (values: LoginFormData) => {
  const response: any = await loginApi(values.email, values.password);
  // console.log(response);
  
  
  login(response.token);
- navigate("/");
+ 
+ // Redirect to the page the user was trying to access, or home if none
+ const from = (location.state as { from?: Location })?.from?.pathname || "/";
+ navigate(from, { replace: true });
 };
 
     return (
@@ -136,13 +141,20 @@ const onSubmit = async (values: LoginFormData) => {
                     </form>
                 </CardContent>
                 <CardFooter className="flex flex-col gap-4">
-                    <Button
-                        type="submit"
-                        form="form-rhf-demo"
-                        className="w-full h-11"
+                    <motion.div
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ duration: 0.2 }}
+                        className="w-full"
                     >
-                        Sign In
-                    </Button>
+                        <Button
+                            type="submit"
+                            form="form-rhf-demo"
+                            className="w-full h-11"
+                        >
+                            Sign In
+                        </Button>
+                    </motion.div>
 
                     <p className="text-center text-sm text-slate-500">
                         Don't have an account?{" "}

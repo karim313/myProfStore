@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { buildProductMediaList, type ProductMedia, type MediaGalleryItem } from '../../lib/productMedia';
 import { Play, Maximize2, X, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Helper function to convert YouTube URLs to embed format
 const getYouTubeEmbedUrl = (url: string): string | null => {
   if (!url) return null;
 
-  // Match YouTube regular URLs, Shorts, and embed URLs
   const patterns = [
     /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/,
   ];
@@ -14,7 +14,7 @@ const getYouTubeEmbedUrl = (url: string): string | null => {
   for (const pattern of patterns) {
     const match = url.match(pattern);
     if (match && match[1]) {
-      return `https://www.youtube-nocookie.com/embed/${match[1]}?autoplay=1&mute=0&controls=0&loop=1&playlist=${match[1]}&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0&cc_load_policy=0&hl=en`;
+      return `https://www.youtube-nocookie.com/embed/${match[1]}?autoplay=1&mute=1&controls=0&loop=1&playlist=${match[1]}&modestbranding=1&rel=0&disablekb=1&fs=0&playsinline=1`;
     }
   }
 
@@ -87,38 +87,66 @@ export default function ProductMediaGallery({ product }: ProductMediaGalleryProp
   return (
     <div className="flex flex-col gap-4 w-full">
       {/* ── Main Active Media View ── */}
-      <div className="relative w-full h-80 md:h-[450px] bg-black/5 rounded-3xl overflow-hidden border border-gray-200 shadow-lg group flex items-center justify-center">
-        {activeMedia?.type === 'video' ? (
-          isYouTube && youtubeEmbedUrl ? (
-            <iframe
-              key={activeMedia.id}
-              src={youtubeEmbedUrl}
-              title="YouTube video player"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="w-full h-full object-contain bg-black"
-            />
+      <motion.div 
+        className="relative w-full h-80 md:h-[450px] bg-black/5 rounded-3xl overflow-hidden border border-gray-200 shadow-lg group flex items-center justify-center"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
+      >
+        <AnimatePresence mode="wait">
+          {activeMedia?.type === 'video' ? (
+            isYouTube && youtubeEmbedUrl ? (
+              <motion.iframe
+                key={activeMedia.id}
+                src={youtubeEmbedUrl}
+                title="YouTube product preview"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full object-contain bg-black"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              />
+            ) : (
+              <motion.video
+                key={activeMedia.id}
+                src={activeMedia.url}
+                muted
+                loop
+                playsInline
+                autoPlay
+                preload="metadata"
+                className="w-full h-full object-contain bg-black"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              />
+            )
           ) : (
-            <video
-              key={activeMedia.id}
-              src={activeMedia.url}
-              controls
-              autoPlay
-              className="w-full h-full object-contain bg-black"
+            <motion.img
+              key={activeMedia?.id}
+              src={activeMedia?.url}
+              alt={product?.name || 'Product'}
+              onClick={() => setIsFullscreen(true)}
+              className="w-full h-full object-cover cursor-pointer"
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.3 }}
+              whileHover={{ scale: 1.05 }}
             />
-          )
-        ) : (
-          <img
-            key={activeMedia?.id}
-            src={activeMedia?.url}
-            alt={product?.name || 'Product'}
-            onClick={() => setIsFullscreen(true)}
-            className="w-full h-full object-cover cursor-pointer transition-transform duration-500 group-hover:scale-105"
-          />
-        )}
+          )}
+        </AnimatePresence>
 
         {/* Media Type Badge */}
-        <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow">
+        <motion.div 
+          className="absolute top-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
           {activeMedia?.type === 'video' ? (
             <>
               <Play size={12} className="fill-white" />
@@ -130,47 +158,71 @@ export default function ProductMediaGallery({ product }: ProductMediaGalleryProp
               <span>{activeMedia?.isMain ? 'الصورة الرئيسية' : 'صورة'}</span>
             </>
           )}
-        </div>
+        </motion.div>
 
         {/* Fullscreen Trigger Button */}
-        <button
+        <motion.button
           type="button"
           onClick={() => setIsFullscreen(true)}
-          className="absolute bottom-4 left-4 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white p-2.5 rounded-full shadow-lg transition-all duration-300 hover:scale-110 cursor-pointer"
+          className="absolute bottom-4 left-4 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white p-2.5 rounded-full shadow-lg cursor-pointer"
           title="معاينة ملء الشاشة"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3 }}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
         >
           <Maximize2 size={18} />
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
 
       {/* ── Thumbnails Strip (Video thumbnails first, then image thumbnails) ── */}
-      <div className="flex items-center gap-3 overflow-x-auto pb-2 pt-1 scrollbar-thin scrollbar-thumb-emerald-600">
+      <motion.div 
+        className="flex items-center gap-3 overflow-x-auto pb-2 pt-1 scrollbar-thin scrollbar-thumb-emerald-600"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+      >
         {mediaList.map((item, idx) => {
           const isSelected = idx === activeIndex;
 
           return (
-            <button
+            <motion.button
               key={item.id}
               type="button"
               onClick={() => setActiveIndex(idx)}
-              className={`relative flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 transition-all duration-300 cursor-pointer ${
+              className={`relative flex-shrink-0 w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 cursor-pointer ${
                 isSelected
-                  ? 'border-[#00342B] ring-2 ring-emerald-500 scale-105 shadow-md'
-                  : 'border-transparent opacity-70 hover:opacity-100 hover:scale-100'
+                  ? 'border-[#00342B] ring-2 ring-emerald-500 shadow-md'
+                  : 'border-transparent opacity-70 hover:opacity-100'
               }`}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ 
+                opacity: isSelected ? 1 : 0.7, 
+                scale: isSelected ? 1.05 : 1 
+              }}
+              whileHover={{ scale: 1.05, opacity: 1 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.2 }}
             >
               {item.type === 'video' ? (
                 <div className="w-full h-full bg-slate-900 relative flex items-center justify-center">
-                  <video
-                    src={`${item.url}#t=0.5`}
-                    preload="metadata"
-                    className="w-full h-full object-cover opacity-60"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                    <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow">
-                      <Play size={14} className="fill-white translate-x-0.5" />
+                  {!isYouTubeUrl(item.url) ? (
+                    <video
+                      src={`${item.url}#t=0.5`}
+                      preload="metadata"
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover opacity-60"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-slate-900/85 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg">
+                        <Play size={16} className="fill-white" />
+                      </div>
                     </div>
-                  </div>
+                  )}
+                  <div className="absolute inset-0 bg-black/20" />
                   <span className="absolute bottom-1 right-1 text-[9px] bg-black/70 text-white px-1 rounded">
                     فيديو
                   </span>
@@ -182,105 +234,139 @@ export default function ProductMediaGallery({ product }: ProductMediaGalleryProp
                   className="w-full h-full object-cover"
                 />
               )}
-            </button>
+            </motion.button>
           );
         })}
-      </div>
+      </motion.div>
 
       {/* ── Fullscreen Preview Modal ── */}
-      {isFullscreen && (
-        <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between p-4 md:p-8 animate-fadeIn">
-          {/* Top Bar */}
-          <div className="flex justify-between items-center text-white z-10">
-            <div className="text-sm font-medium text-gray-300">
-              {activeIndex + 1} / {mediaList.length} — {activeMedia?.label}
-            </div>
-            <button
-              type="button"
-              onClick={() => setIsFullscreen(false)}
-              className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full transition-all cursor-pointer"
-              title="إغلاق"
+      <AnimatePresence>
+        {isFullscreen && (
+          <motion.div 
+            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex flex-col justify-between p-4 md:p-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Top Bar */}
+            <motion.div 
+              className="flex justify-between items-center text-white z-10"
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.1 }}
             >
-              <X size={24} />
-            </button>
-          </div>
-
-          {/* Media Viewport */}
-          <div className="relative flex-1 flex items-center justify-center my-4 overflow-hidden">
-            {/* Prev Button */}
-            <button
-              type="button"
-              onClick={() => setActiveIndex((prev) => (prev - 1 + mediaList.length) % mediaList.length)}
-              className="absolute left-2 md:left-6 z-20 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition cursor-pointer"
-              title="السابق"
-            >
-              <ChevronLeft size={28} />
-            </button>
-
-            {/* Content */}
-            <div className="max-w-5xl max-h-full flex items-center justify-center p-2">
-              {activeMedia?.type === 'video' ? (
-                isYouTube && youtubeEmbedUrl ? (
-                  <iframe
-                    src={youtubeEmbedUrl}
-                    title="YouTube video player"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl"
-                  />
-                ) : (
-                  <video
-                    src={activeMedia.url}
-                    controls
-                    autoPlay
-                    className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl"
-                  />
-                )
-              ) : (
-                <img
-                  src={activeMedia?.url}
-                  alt={product?.name || 'Fullscreen Preview'}
-                  className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl"
-                />
-              )}
-            </div>
-
-            {/* Next Button */}
-            <button
-              type="button"
-              onClick={() => setActiveIndex((prev) => (prev + 1) % mediaList.length)}
-              className="absolute right-2 md:right-6 z-20 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition cursor-pointer"
-              title="التالي"
-            >
-              <ChevronRight size={28} />
-            </button>
-          </div>
-
-          {/* Bottom Thumbnails Strip in Lightbox */}
-          <div className="flex justify-center items-center gap-2 overflow-x-auto py-2">
-            {mediaList.map((item, idx) => (
-              <button
-                key={item.id}
+              <div className="text-sm font-medium text-gray-300">
+                {activeIndex + 1} / {mediaList.length} — {activeMedia?.label}
+              </div>
+              <motion.button
                 type="button"
-                onClick={() => setActiveIndex(idx)}
-                className={`w-14 h-14 rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
-                  idx === activeIndex
-                    ? 'border-emerald-500 scale-110'
-                    : 'border-transparent opacity-50 hover:opacity-100'
-                }`}
+                onClick={() => setIsFullscreen(false)}
+                className="p-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full cursor-pointer"
+                title="إغلاق"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
               >
-                {item.type === 'video' ? (
-                  <div className="w-full h-full bg-slate-800 flex items-center justify-center">
-                    <Play size={14} className="text-white fill-white" />
-                  </div>
+                <X size={24} />
+              </motion.button>
+            </motion.div>
+
+            {/* Media Viewport */}
+            <div className="relative flex-1 flex items-center justify-center my-4 overflow-hidden">
+              {/* Prev Button */}
+              <motion.button
+                type="button"
+                onClick={() => setActiveIndex((prev) => (prev - 1 + mediaList.length) % mediaList.length)}
+                className="absolute left-2 md:left-6 z-20 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full cursor-pointer"
+                title="السابق"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <ChevronLeft size={28} />
+              </motion.button>
+
+              {/* Content */}
+              <motion.div 
+                className="max-w-5xl max-h-full flex items-center justify-center p-2"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                key={activeIndex}
+                transition={{ duration: 0.3 }}
+              >
+                {activeMedia?.type === 'video' ? (
+                  isYouTube && youtubeEmbedUrl ? (
+                    <iframe
+                      src={youtubeEmbedUrl}
+                      title="YouTube video player"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl"
+                    />
+                  ) : (
+                    <video
+                      src={activeMedia.url}
+                      controls
+                      autoPlay
+                      className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl"
+                    />
+                  )
                 ) : (
-                  <img src={item.url} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={activeMedia?.url}
+                    alt={product?.name || 'Fullscreen Preview'}
+                    className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl"
+                  />
                 )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+              </motion.div>
+
+              {/* Next Button */}
+              <motion.button
+                type="button"
+                onClick={() => setActiveIndex((prev) => (prev + 1) % mediaList.length)}
+                className="absolute right-2 md:right-6 z-20 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full cursor-pointer"
+                title="التالي"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <ChevronRight size={28} />
+              </motion.button>
+            </div>
+
+            {/* Bottom Thumbnails Strip in Lightbox */}
+            <motion.div 
+              className="flex justify-center items-center gap-2 overflow-x-auto py-2"
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              {mediaList.map((item, idx) => (
+                <motion.button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setActiveIndex(idx)}
+                  className={`w-14 h-14 rounded-xl overflow-hidden border-2 cursor-pointer ${
+                    idx === activeIndex
+                      ? 'border-emerald-500'
+                      : 'border-transparent opacity-50 hover:opacity-100'
+                  }`}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  animate={{ scale: idx === activeIndex ? 1.1 : 1 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {item.type === 'video' ? (
+                    <div className="w-full h-full bg-slate-800 flex items-center justify-center">
+                      <Play size={14} className="text-white fill-white" />
+                    </div>
+                  ) : (
+                    <img src={item.url} alt="" className="w-full h-full object-cover" />
+                  )}
+                </motion.button>
+              ))}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

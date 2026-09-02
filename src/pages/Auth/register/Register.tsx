@@ -5,6 +5,7 @@ import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 import { FaUserPlus } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 import { registerApi } from "@/api/Auth/authApi";
 
@@ -153,13 +154,20 @@ export function Register() {
         </CardContent>
 
         <CardFooter className="flex flex-col gap-4">
-          <Button
-            form="register-form"
-            type="submit"
-            className="w-full h-11"
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ duration: 0.2 }}
+            className="w-full"
           >
-            Create Account
-          </Button>
+            <Button
+              form="register-form"
+              type="submit"
+              className="w-full h-11"
+            >
+              Create Account
+            </Button>
+          </motion.div>
 
           <p className="text-center text-sm text-slate-500">
             Already have an account?{" "}

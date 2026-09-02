@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -9,7 +9,7 @@ export interface Toast {
   type: ToastType;
 }
 
-const icons: Record<ToastType, JSX.Element> = {
+const icons: Record<ToastType, ReactElement> = {
   success: (
     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />

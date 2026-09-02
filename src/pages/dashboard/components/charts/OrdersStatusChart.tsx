@@ -38,7 +38,7 @@ export default function OrdersStatusChart({ orders }: Props) {
           {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
         </Pie>
         <Tooltip
-          formatter={(v: number, name: string) => [v, name]}
+          formatter={(v: any, name: any) => [v, name]}
           contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 12 }} />
         <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
       </PieChart>

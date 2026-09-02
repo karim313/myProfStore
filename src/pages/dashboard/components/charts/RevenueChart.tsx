@@ -57,7 +57,7 @@ export default function RevenueChart({ orders }: Props) {
         <YAxis tick={{ fontSize: 11 }} tickLine={false}
           tickFormatter={v => `$${v}`} width={58} />
         <Tooltip
-          formatter={(v: number) => [`$${v.toFixed(2)}`, 'Revenue']}
+          formatter={(v: any) => [`$${Number(v || 0).toFixed(2)}`, 'Revenue']}
           contentStyle={{ borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 12 }} />
         <Area type="monotone" dataKey="revenue"
           stroke="#00342B" strokeWidth={2.5}

@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getProductById, getProducts, addToWishlist, removeFromWishlist, getWishlist } from '../../api/axios';
 import { useReviewedProducts } from '@/Context/ReviewedProductsContext';
@@ -8,7 +8,6 @@ import { getPrimaryImage } from '../../lib/productMedia';
 import { Heart } from 'lucide-react';
 import { handleAddToCart } from '@/helper/addToCart';
 import { motion } from 'framer-motion';
-import { gsap } from '../../utils/gsap';
 
 export default function SpecificProduct() {
   const { id } = useParams();
@@ -273,7 +272,7 @@ export default function SpecificProduct() {
               viewport={{ once: true, margin: "-100px" }}
               variants={containerVariants}
             >
-              {relatedProducts.map((relatedProduct, index) => (
+              {relatedProducts.map((relatedProduct) => (
                 <motion.div
                   key={relatedProduct.id}
                   className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm group relative"

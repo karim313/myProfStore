@@ -210,36 +210,38 @@ export function flyToCart(
     // 9. Bounce cart button
     // ==========================================
 
-    cartBtn.animate(
-      [
+    if (cartBtn) {
+      cartBtn.animate(
+        [
+          {
+            transform: "scale(1)",
+          },
+          {
+            transform: "scale(1.2)",
+          },
+          {
+            transform: "scale(0.92)",
+          },
+          {
+            transform: "scale(1.08)",
+          },
+          {
+            transform: "scale(1)",
+          },
+        ],
         {
-          transform: "scale(1)",
-        },
-        {
-          transform: "scale(1.2)",
-        },
-        {
-          transform: "scale(0.92)",
-        },
-        {
-          transform: "scale(1.08)",
-        },
-        {
-          transform: "scale(1)",
-        },
-      ],
-      {
-        duration: 400,
-        easing: "ease-out",
-      }
-    );
+          duration: 400,
+          easing: "ease-out",
+        }
+      );
+    }
 
     // ==========================================
     // 10. Pulse cart badge
     // ==========================================
 
     const badge =
-      cartBtn.querySelector(
+      cartBtn?.querySelector(
         "span"
       ) as HTMLElement | null;
 

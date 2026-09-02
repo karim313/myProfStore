@@ -96,7 +96,7 @@ const [isSearching, setIsSearching] = useState(false);
 
   const handleProtectedNavigation = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    to: string,
+    _to: string,
     protectedRoute: boolean
   ) => {
     if (protectedRoute && !isAuthenticated) {

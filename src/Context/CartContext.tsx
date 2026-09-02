@@ -99,9 +99,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
           const fallbackProduct: Product = {
             id: productId ?? cartItemId,
             name: (itemObj?.name as string) ?? (itemObj?.productName as string) ?? 'Product',
+            description: (itemObj?.description as string) ?? '',
             finalPrice: Number(itemObj?.price ?? itemObj?.finalPrice ?? 0),
-            price: Number(itemObj?.price ?? 0),
+            originalPrice: Number(itemObj?.originalPrice ?? itemObj?.price ?? 0),
+            discountPercentage: 0,
+            offerEndDate: '',
             mainImage: (itemObj?.image as string) ?? (itemObj?.mainImage as string) ?? '',
+            images: [],
+            mainVideo: '',
+            videos: [],
             category: '',
             stockQuantity: 100,
           };

@@ -15,6 +15,8 @@ import Deal from './pages/deal/Deal';
 import Orders from './pages/Orders/Orders';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
+import NotFound from './pages/NotFound/NotFound';
+
 const router = createBrowserRouter([
     {path: '/', element: <Layout />, children: [
       {
@@ -72,11 +74,16 @@ const router = createBrowserRouter([
           <Orders />
         </ProtectedRoute>
       )
+    },
+    {
+      path: "*",
+      element: <NotFound />
     }
     
     ]},
     {path:'/login',element:<AuthPage/>},
-    {path:'/register',element:<AuthPage/>}
+    {path:'/register',element:<AuthPage/>},
+    {path:'*',element:<NotFound/>}
   ],
   {
     future: {

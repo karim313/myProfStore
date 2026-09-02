@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { getProducts, logout as logoutApi } from '../api/axios'
+import { getCategories, getProducts, logout as logoutApi } from '../api/axios'
 import { useAuth } from '../features/context/tokenContext'
 import { useCart } from '../Context/CartContext'
 import { useWishlist } from '../Context/WishlistContext'
@@ -45,15 +45,15 @@ const PROMO_MESSAGES = [
   '🔄 30-day hassle-free return policy & exchange guarantee',
 ]
 
-const CATEGORIES = [
-  'All Categories',
-  'Electronics',
-  'Fashion & Apparel',
-  'Home & Living',
-  'Beauty & Personal Care',
-  'Sports & Outdoors',
-  'Books & Stationery',
-]
+// const CATEGORIES = [
+//   'All Categories',
+//   'Electronics',
+//   'Fashion & Apparel',
+//   'Home & Living',
+//   'Beauty & Personal Care',
+//   'Sports & Outdoors',
+//   'Books & Stationery',
+// ]
 
 const POPULAR_SEARCHES = [
   'Wireless Earbuds',
@@ -82,6 +82,7 @@ const [isSearching, setIsSearching] = useState(false);
   const { isAuthenticated, logout } = useAuth();
   const { cartItems, cartCount, updateQuantity: ctxUpdateQty, removeFromCart: ctxRemoveFromCart } = useCart();
   const { wishlistCount } = useWishlist();
+  const [CATEGORIES, setCATEGORIES] = useState()
   // Language & Currency Dropdowns
   const [langOpen, setLangOpen] = useState(false)
   const [currOpen, setCurrOpen] = useState(false)
@@ -97,6 +98,8 @@ const [isSearching, setIsSearching] = useState(false);
     { label: "Deals", to: "/deals", protected: false },
     { label: "Orders", to: "/orders", protected: true },
   ];
+
+
 
   const handleProtectedNavigation = (
     e: React.MouseEvent<HTMLAnchorElement>,
@@ -139,7 +142,16 @@ const [isSearching, setIsSearching] = useState(false);
     return () => clearInterval(timer)
   }, [])
 
+  // get categories
 
+  async function getAllCategories() {
+    const res = await getCategories();
+    setCATEGORIES(res);
+    return res;
+  }
+  useEffect(()=>{
+    getAllCategories();
+  },[])
   // Close modals on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

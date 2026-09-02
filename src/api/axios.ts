@@ -7,7 +7,8 @@ import type {
   AddReviewRequest,
 } from '../interface';
 
-export const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://newproject.runasp.net';
+// export const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+export const BASE_URL = '';
 
 // Centralized Axios Instance
 export const api = axios.create({

@@ -295,9 +295,9 @@ export default function HeroSlider() {
                   variants={textItemVariants}
                   className="flex flex-row gap-3 flex-wrap justify-center lg:justify-start"
                 >
-                  {/* Primary */}
+                  {/* Category CTA */}
                   <button
-                    onClick={() => navigate(slide.primaryCta.path)}
+                    onClick={() => navigate('/category')}
                     className="group flex items-center gap-2 text-white px-7 py-3.5 rounded-2xl font-semibold text-sm transition-all duration-300 hover:-translate-y-1 shadow-lg cursor-pointer"
                     style={{
                       background: slide.accentColor,
@@ -306,20 +306,20 @@ export default function HeroSlider() {
                     onMouseEnter={e => (e.currentTarget.style.boxShadow = `0 12px 36px ${slide.accentColor}55`)}
                     onMouseLeave={e => (e.currentTarget.style.boxShadow = `0 8px 28px ${slide.accentColor}40`)}
                   >
-                    {slide.primaryCta.label}
+                    تصفح الأقسام
                     <ArrowRight size={15} className="group-hover:translate-x-0.5 transition-transform duration-200" />
                   </button>
 
-                  {/* Secondary */}
+                  {/* Deals CTA */}
                   <button
-                    onClick={() => navigate(slide.secondaryCta.path)}
+                    onClick={() => navigate('/deals')}
                     className="flex items-center gap-2 bg-white/80 backdrop-blur-sm px-7 py-3.5 rounded-2xl font-medium text-sm border transition-all duration-300 hover:-translate-y-1 hover:bg-white cursor-pointer"
                     style={{
                       color: slide.accentColor,
                       borderColor: `${slide.accentColor}25`,
                     }}
                   >
-                    {slide.secondaryCta.label}
+                    العروض الحصرية
                   </button>
                 </motion.div>
 

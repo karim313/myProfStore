@@ -82,7 +82,7 @@ const [isSearching, setIsSearching] = useState(false);
   const { isAuthenticated, logout } = useAuth();
   const { cartItems, cartCount, updateQuantity: ctxUpdateQty, removeFromCart: ctxRemoveFromCart } = useCart();
   const { wishlistCount } = useWishlist();
-  const [CATEGORIES, setCATEGORIES] = useState()
+  const [CATEGORIES, setCATEGORIES] = useState<string[]>([])
   // Language & Currency Dropdowns
   const [langOpen, setLangOpen] = useState(false)
   const [currOpen, setCurrOpen] = useState(false)
@@ -143,11 +143,25 @@ const [isSearching, setIsSearching] = useState(false);
   }, [])
 
   // get categories
-
   async function getAllCategories() {
-    const res = await getCategories();
-    setCATEGORIES(res);
-    return res;
+    try {
+      const res = await getCategories();
+      console.log(res);
+      
+      // Handle different response formats & extract string names safely
+      const rawCategories = Array.isArray(res) ? res : (res?.data || res?.categories || []);
+      const categories: string[] = rawCategories
+        .map((cat: any) => (typeof cat === 'string' ? cat : cat?.name ?? String(cat || '')))
+        .filter(Boolean);
+
+      const allCategories = ['All Categories', ...categories.filter(c => c !== 'All Categories')];
+      setCATEGORIES(allCategories);
+      return allCategories;
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+      setCATEGORIES([]);
+      return [];
+    }
   }
   useEffect(()=>{
     getAllCategories();
@@ -828,16 +842,22 @@ const [isSearching, setIsSearching] = useState(false);
                     onMouseLeave={() => setShowCategoryBarDropdown(false)}
                     className="absolute left-0 mt-1 w-64 bg-white rounded-xl shadow-xl border border-slate-100 py-2.5 z-50"
                   >
-                    {CATEGORIES.slice(1).map((category) => (
-                      <a
-                        key={category}
-                        href={`#category-${category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}
-                        className="flex items-center justify-between px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-brand font-medium transition-colors"
-                      >
-                        <span>{category}</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                      </a>
-                    ))}
+                    {(CATEGORIES || []).slice(1).map((category) => {
+                      const catName = String(category || '');
+                      return (
+                        <button
+                          key={catName}
+                          onClick={() => {
+                            setShowCategoryBarDropdown(false);
+                            navigate(`/category?category=${encodeURIComponent(catName)}`);
+                          }}
+                          className="w-full flex items-center justify-between px-4 py-2.5 text-xs text-slate-700 hover:bg-slate-50 hover:text-brand font-medium transition-colors text-left cursor-pointer"
+                        >
+                          <span>{catName}</span>
+                          <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                        </button>
+                      );
+                    })}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -1179,17 +1199,22 @@ const [isSearching, setIsSearching] = useState(false);
                 <div>
                   <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Top Categories</h4>
                   <div className="flex flex-col space-y-1">
-                    {CATEGORIES.slice(1, 6).map((category) => (
-                      <a
-                        key={category}
-                        href={`#category-${category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}
-                        onClick={() => setMenuOpen(false)}
-                        className="flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
-                      >
-                        <span>{category}</span>
-                        <ChevronRight className="w-3.5 h-3.5 opacity-40" />
-                      </a>
-                    ))}
+                    {(CATEGORIES || []).slice(1, 6).map((category) => {
+                      const catName = String(category || '');
+                      return (
+                        <button
+                          key={catName}
+                          onClick={() => {
+                            setMenuOpen(false);
+                            navigate(`/category?category=${encodeURIComponent(catName)}`);
+                          }}
+                          className="w-full flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 rounded-lg transition-colors text-left cursor-pointer"
+                        >
+                          <span>{catName}</span>
+                          <ChevronRight className="w-3.5 h-3.5 opacity-40" />
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 

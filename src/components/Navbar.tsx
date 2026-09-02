@@ -659,14 +659,14 @@ const [isSearching, setIsSearching] = useState(false);
                       boxShadow: ["0 0 0 0 rgba(16, 185, 129, 0)", "0 0 0 10px rgba(16, 185, 129, 0)", "0 0 0 0 rgba(16, 185, 129, 0)"]
                     } : {}}
                     transition={{ duration: 0.5 }}
-                    className="absolute -top-1.5 -right-1.5 w-4.5 h-4.5 bg-brand text-white text-[10px] font-bold rounded-full flex items-center justify-center border border-white"
+                    className="absolute -top-2 -right-2 px-1.5 min-w-[1.25rem] h-5 bg-brand text-white text-[11px] font-extrabold rounded-full flex items-center justify-center border-2 border-white shadow-sm"
                   >
                     {totalItemCount}
                   </motion.span>
                 )}
               </motion.div>
               <div className="hidden sm:flex flex-col text-left text-xs">
-                <span className="text-[10px] text-slate-400 font-semibold uppercase leading-none">Cart</span>
+                <span className="text-[10px] text-slate-400 font-semibold uppercase leading-none">Cart ({totalItemCount})</span>
                 <span className="font-bold text-slate-800 mt-0.5">${cartTotal.toFixed(2)}</span>
               </div>
             </button>

@@ -74,7 +74,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
 
   const refreshCart = useCallback(async () => {
-    if (!isAuthenticated) {
+    const token = localStorage.getItem('token');
+    if (!token && !isAuthenticated) {
       setCartItems([]);
       return;
     }
@@ -84,19 +85,36 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       const payload = getCartItemsPayload(res);
       const fullCart = await Promise.all(
         payload.map(async (item: unknown) => {
-          const cartItemId = getCartItemId(item);
+          const cartItemId = getCartItemId(item) ?? Math.random();
           const productId = getCartItemProductId(item);
-          if (!cartItemId || !productId) return null;
-          const product = await getProductById(productId);
+          let product: Product | null = null;
+          if (productId) {
+            try {
+              product = await getProductById(productId);
+            } catch (_) {
+              /* ignore fallback product fetch failure */
+            }
+          }
+          const itemObj = item as Record<string, unknown>;
+          const fallbackProduct: Product = {
+            id: productId ?? cartItemId,
+            name: (itemObj?.name as string) ?? (itemObj?.productName as string) ?? 'Product',
+            finalPrice: Number(itemObj?.price ?? itemObj?.finalPrice ?? 0),
+            price: Number(itemObj?.price ?? 0),
+            mainImage: (itemObj?.image as string) ?? (itemObj?.mainImage as string) ?? '',
+            category: '',
+            stockQuantity: 100,
+          };
+
           return {
             id: cartItemId,
-            productId,
+            productId: productId ?? cartItemId,
             quantity: getCartItemQuantity(item),
-            product,
+            product: product || fallbackProduct,
           };
         })
       );
-      setCartItems(fullCart.filter(Boolean) as CartItem[]);
+      setCartItems(fullCart as CartItem[]);
     } catch (error) {
       console.error('Failed to fetch cart:', error);
       setCartItems([]);
@@ -105,9 +123,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isAuthenticated]);
 
+  // Refresh cart on mount and when authentication or cartUpdated events trigger
   useEffect(() => {
     refreshCart();
-  }, [refreshCart]);
+
+    const handleCartUpdated = () => {
+      refreshCart();
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdated);
+    window.addEventListener('storage', handleCartUpdated);
+
+    return () => {
+      window.removeEventListener('cartUpdated', handleCartUpdated);
+      window.removeEventListener('storage', handleCartUpdated);
+    };
+  }, [isAuthenticated, refreshCart]);
 
   const addToCart = async (product: Product, quantity: number = 1) => {
     try {
@@ -121,11 +152,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const updateQuantity = async (cartItemId: number, quantity: number) => {
     try {
-      const response = await apiUpdateCartItem(cartItemId, { quantity });
-      const updatedQty = response?.cartItem?.quantity ?? quantity;
-      setCartItems((prev) =>
-        prev.map((item) => (item.id === cartItemId ? { ...item, quantity: updatedQty } : item))
-      );
+      await apiUpdateCartItem(cartItemId, { quantity });
+      // Refresh cart to ensure consistency with server
+      await refreshCart();
     } catch (error) {
       console.error('Failed to update cart item quantity:', error);
       throw error;
@@ -135,7 +164,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const removeFromCart = async (cartItemId: number, productId?: number) => {
     try {
       await apiRemoveFromCart(productId ?? cartItemId);
-      setCartItems((prev) => prev.filter((item) => item.id !== cartItemId));
+      // Refresh cart to ensure consistency with server
+      await refreshCart();
     } catch (error) {
       console.error('Failed to remove cart item:', error);
       throw error;

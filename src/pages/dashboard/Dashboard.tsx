@@ -16,6 +16,9 @@ import { getUsers, updateUser as apiUpdateUser, deleteUser as apiDeleteUser } fr
 import { getPrimaryImage, type ProductMedia } from '../../lib/productMedia';
 import { getOrders, updateOrderStatus, cancelOrder } from '../../api/axios';
 import { motion } from 'framer-motion';
+import RevenueChart from './components/charts/RevenueChart';
+import OrdersStatusChart from './components/charts/OrdersStatusChart';
+import StockAlertWidget from './components/charts/StockAlertWidget';
 
 interface Category {
   id: number;
@@ -724,11 +727,11 @@ const Dashboard = () => {
     }
   }
 
-  const filteredCategories = categories.filter(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  const filteredQuestions = questions.filter(q => q.question.toLowerCase().includes(searchQuery.toLowerCase()));
-  const filteredUsers = users.filter(u => u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.email.toLowerCase().includes(searchQuery.toLowerCase()));
-  const filteredOrders = orders.filter(o => o.id.toString().includes(searchQuery) || o.status.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredCategories = categories.filter(c => c?.name?.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredProducts = products.filter(p => p?.name?.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredQuestions = questions.filter(q => q?.question?.toLowerCase().includes(searchQuery.toLowerCase()));
+  const filteredUsers = users.filter(u => (u?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || u?.email?.toLowerCase().includes(searchQuery.toLowerCase())));
+  const filteredOrders = orders.filter(o => (o?.id?.toString().includes(searchQuery) || o?.status?.toLowerCase().includes(searchQuery.toLowerCase())));
 
   return (
     <div className="flex h-screen bg-gray-50 font-sans">
@@ -814,38 +817,41 @@ const Dashboard = () => {
                     })}
                   </div>
                 </motion.div>
-                <motion.div 
+                <motion.div
                   className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
                   variants={itemVariants}
                 >
-                  <h3 className="text-lg font-bold text-gray-800 mb-4">Category Distribution</h3>
-                  <div className="space-y-4">
-                    {categories.map((cat, index) => {
-                      const count = products.filter(p => p.category === cat.name).length;
-                      const percentage = products.length > 0 ? (count / products.length) * 100 : 0;
-                      return (
-                        <motion.div 
-                          key={cat.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
-                        >
-                          <div className="flex justify-between text-sm mb-1">
-                            <span className="font-medium text-gray-700">{cat.name}</span>
-                            <span className="text-gray-500">{count} products</span>
-                          </div>
-                          <div className="w-full bg-gray-100 rounded-full h-2.5">
-                            <motion.div 
-                              className="bg-[#00342B] h-2.5 rounded-full"
-                              initial={{ width: 0 }}
-                              animate={{ width: `${percentage}%` }}
-                              transition={{ duration: 0.8, delay: index * 0.1 }}
-                            ></motion.div>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
+                  <h3 className="text-lg font-bold text-gray-800 mb-1">Orders by Status</h3>
+                  <p className="text-xs text-gray-400 mb-2">Distribution of all customer orders</p>
+                  <OrdersStatusChart orders={orders} />
+                </motion.div>
+              </motion.div>
+
+              {/* Revenue & Stock Alert Row */}
+              <motion.div
+                className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+                variants={containerVariants}
+              >
+                <motion.div
+                  className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+                  variants={itemVariants}
+                >
+                  <h3 className="text-lg font-bold text-gray-800 mb-1">Monthly Revenue</h3>
+                  <p className="text-xs text-gray-400 mb-4">Excluding cancelled orders</p>
+                  <RevenueChart orders={orders} />
+                </motion.div>
+
+                <motion.div
+                  className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100"
+                  variants={itemVariants}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-gray-800">⚠️ Stock Alerts</h3>
+                    <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full">
+                      {products.filter(p => (p.stockQuantity ?? 0) <= 20).length} items low
+                    </span>
                   </div>
+                  <StockAlertWidget products={products} threshold={20} />
                 </motion.div>
               </motion.div>
             </motion.div>

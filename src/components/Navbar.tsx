@@ -27,7 +27,11 @@ import {
   Minus,
   ArrowRight,
   Truck,
-  Tag
+  Tag,
+  Home,
+  LayoutGrid,
+  Zap,
+  Package
 } from 'lucide-react'
 import { useCartAnimation } from '../hooks/cart/useCartAnimation'
 import type { Product } from '../interface'
@@ -1132,13 +1136,13 @@ const [isSearching, setIsSearching] = useState(false);
                   <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Main Navigation</h4>
                   <nav className="flex flex-col space-y-1">
                     {[
-                      { label: 'Home', to: '/' },
-                      { label: 'Categories', to: '/category' },
-                      { label: 'Cart', to: '/cart' },
-                      { label: 'Deals', to: '/deals' },
-                      { label: 'My Orders', to: '/orders' },
-                      { label: 'New Arrivals', to: '/new-arrivals' },
-                    ].map(({ label, to }) => (
+                      { label: 'Home', to: '/', icon: Home },
+                      { label: 'Categories', to: '/category', icon: LayoutGrid },
+                      { label: 'Dashboard', to: '/dashboard', icon: Settings },
+                      { label: 'Cart', to: '/cart', icon: ShoppingCart },
+                      { label: 'Deals', to: '/deals', icon: Zap },
+                      { label: 'My Orders', to: '/orders', icon: Package },
+                    ].map(({ label, to, icon: Icon }) => (
                       <NavLink
                         key={to}
                         to={to}
@@ -1150,7 +1154,10 @@ const [isSearching, setIsSearching] = useState(false);
                           }`
                         }
                       >
-                        <span>{label}</span>
+                        <span className="flex items-center gap-2">
+                          <Icon className="w-4 h-4" />
+                          {label}
+                        </span>
                         <ChevronRight className="w-4 h-4 opacity-55" />
                       </NavLink>
                     ))}
